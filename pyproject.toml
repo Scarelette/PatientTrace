@@ -3,9 +3,9 @@ requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "angel-demo"
+name = "patienttrace"
 version = "0.1.0"
-description = "PatientTrace (ANGEL demo): interview a simulated patient, trace replies onto its symptom network, find contrast patients and compare two patients side by side."
+description = "PatientTrace: interview a simulated patient, trace replies onto its symptom network, find contrast patients and compare two patients side by side."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
@@ -23,14 +23,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Only on the machine that runs the patient model (`angel-demo worker`).
+# Only on the machine that runs the patient model (`patienttrace worker`).
 gpu = ["vllm>=0.10", "torch", "transformers"]
 
 [project.scripts]
-angel-demo = "angel_demo.cli:main"
+patienttrace = "patienttrace.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["angel_demo*"]
+include = ["patienttrace*"]
 
 [tool.setuptools.package-data]
-angel_demo = ["static/*"]
+patienttrace = ["static/*"]

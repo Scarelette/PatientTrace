@@ -25,17 +25,17 @@ Hugging Face dataset. Use the access token given with the paper submission:
 
 ```bash
 export HF_TOKEN=<access token from the submission>
-angel-demo download-data         # unpacks into ~/.cache/angel-demo/data
+patienttrace download-data         # unpacks into ~/.cache/patienttrace/data
 ```
 
-To keep the data elsewhere, pass `--dest DIR` and set `ANGEL_DEMO_DATA=DIR` before serving.
+To keep the data elsewhere, pass `--dest DIR` and set `PATIENTTRACE_DATA=DIR` before serving.
 
 ## 3. Run
 
 ### Browse / replay mode
 
 ```bash
-angel-demo serve
+patienttrace serve
 ```
 
 Open http://localhost:7860. Pick **Use an existing profile**, choose a patient, then
@@ -48,13 +48,13 @@ Live mode adds the patient model ([ChengLi0228/Angel-Actor](https://huggingface.
 Qwen3-8B, served with vLLM) and Claude for reply tracing and difference summaries.
 
 ```bash
-pip install "angel-demo[gpu] @ git+https://github.com/Scarelette/PatientTrace.git"
+pip install "patienttrace[gpu] @ git+https://github.com/Scarelette/PatientTrace.git"
 export ANTHROPIC_API_KEY=...       # or put it in a .env file (see .env.example)
-angel-demo serve --start-worker
+patienttrace serve --start-worker
 ```
 
 The first start downloads the model (about 16 GB) and loads it. The page works right away, and
-the first live reply arrives once the model is ready (`~/.cache/angel-demo/state/logs/worker.log`).
+the first live reply arrives once the model is ready (`~/.cache/patienttrace/state/logs/worker.log`).
 
 The model needs about 17 GB of GPU memory plus room for the cache; we ran it on an H200, and a
 24 GB GPU should be enough. If the GPU is on another machine, start the worker there and point
@@ -62,12 +62,12 @@ the app at it:
 
 ```bash
 # on the GPU machine
-angel-demo worker --host 0.0.0.0 --port 7900
+patienttrace worker --host 0.0.0.0 --port 7900
 # on the machine that serves the page
-angel-demo serve --worker-url http://<gpu-host>:7900
+patienttrace serve --worker-url http://<gpu-host>:7900
 ```
 
-`angel-demo check` shows whether the data, the API key and the worker are found.
+`patienttrace check` shows whether the data, the API key and the worker are found.
 
 ## Configuration
 
@@ -75,8 +75,8 @@ angel-demo serve --worker-url http://<gpu-host>:7900
 |---|---|---|
 | `ANTHROPIC_API_KEY` | – | Live tracing and difference summaries (Claude Opus 5.5) |
 | `METHOD_MODEL` | `claude-opus-5-5` | Model for tracing and summaries |
-| `ANGEL_DEMO_DATA` | `~/.cache/angel-demo/data` | Patient data folder |
-| `ANGEL_DEMO_HOME` | `~/.cache/angel-demo/state` | Logs and response cache |
+| `PATIENTTRACE_DATA` | `~/.cache/patienttrace/data` | Patient data folder |
+| `PATIENTTRACE_HOME` | `~/.cache/patienttrace/state` | Logs and response cache |
 | `ANGEL_WORKER_URL` | – | Running worker (same as `--worker-url`) |
 | `ROLEPLAY_MODEL_PATH` | `ChengLi0228/Angel-Actor` | Patient model (Hugging Face id or local folder) |
 | `VLLM_GPU_MEM` | `0.85` | Share of GPU memory vLLM may use |

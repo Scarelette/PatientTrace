@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PatientTrace</title>
+  <link rel="stylesheet" href="/static/styles.css?v=pkg010a" />
+  <script>
+    try { var t = localStorage.getItem("demoTheme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <button id="back-btn" class="back-btn hidden" onclick="App.back()">&larr; Back</button>
+      <div class="brand">Patient Profile → Network Model</div>
+      <nav class="steps hidden" id="steps" aria-label="Progress">
+        <span data-step="profile">Profile</span><i>→</i><span data-step="network">Network</span><i>→</i><span data-step="interview">Interview</span><i>→</i><span data-step="compare">Compare</span>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      <div id="progress" class="progress"></div>
+      <button id="theme-toggle" class="back-btn" onclick="App.toggleTheme()" title="Toggle light / dark">☾</button>
+    </div>
+  </header>
+
+  <div class="paper-bar hidden" id="paper-bar" aria-label="Paper view controls"></div>
+  <main id="app">
+    <!-- PAGE 1: CHOOSE -->
+    <section id="screen-choose" class="screen">
+      <div class="card narrow">
+        <h1>Build a patient network model</h1>
+        <p class="muted">Start from a patient profile; we generate an expanded long profile and a
+          symptom network model showing cause → effect relationships.</p>
+        <div class="choose-grid">
+          <div class="choose-card" onclick="App.goCreate()">
+            <span class="cc-emoji">✍️</span>
+            <h3>Create a new profile</h3>
+            <p>Author a profile field-by-field, with AI writing assist and a quality review.</p>
+          </div>
+          <div class="choose-card" onclick="App.goExisting()">
+            <span class="cc-emoji">📁</span>
+            <h3>Use an existing profile</h3>
+            <p>Pick from 330 curated patient profiles, with filters.</p>
+          </div>
+        </div>
+        <div class="ext-example hidden" id="landing-example"><button type="button" class="ghost" onclick="Ext.openReplay()">See an example</button>
+          <span class="muted small">a recorded side-by-side interview of two patients</span></div>
+        <p class="hidden" id="browse-note"></p>
+        <p class="ext-footnote hidden" data-ext-footnote></p>
+      </div>
+    </section>
+
+    <!-- PAGE 2: CREATE PROFILE -->
+    <section id="screen-create" class="screen">
+      <div class="card">
+        <h1>Create patient profile</h1>
+        <p class="muted">Fill in what you can — empty fields are allowed. Use <strong>✨ Assist</strong> to
+          refine a field or get prompts. Optionally run a quality review, then generate.</p>
+        <form id="profile-form" onsubmit="return false;"></form>
+        <div id="profile-review" class="review-panel hidden">
+          <h3>Quality review <span id="profile-review-status" class="muted small"></span></h3>
+          <div id="profile-review-body"></div>
+        </div>
+        <div class="actions between">
+          <button class="ghost" type="button" onclick="App.reviewProfile()">Run quality review</button>
+          <button class="primary" type="button" onclick="App.generateFromForm()">Generate network model →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 3: EXISTING PROFILE PICKER -->
+    <section id="screen-existing" class="screen">
+      <div class="card">
+        <h1>Choose an existing profile</h1>
+        <div class="filter-bar">
+          <input type="text" id="filter-search" placeholder="Search name, title, or problem…" oninput="App.applyFilters()" />
+          <select id="filter-gender" onchange="App.applyFilters()"></select>
+          <select id="filter-age" onchange="App.applyFilters()"></select>
+          <select id="filter-culture" onchange="App.applyFilters()"></select>
+          <select id="filter-disorder" onchange="App.applyFilters()"></select>
+        </div>
+        <div id="picker-count" class="muted small"></div>
+        <div id="profile-picker" class="profile-picker"></div>
+        <div class="actions between">
+          <span class="muted small" id="picker-hint">No profile selected.</span>
+          <button class="primary" id="existing-generate" type="button" disabled onclick="App.generateFromExisting()">Generate network model →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 4: GENERATE + RESULTS (fills the viewport, no scroll) -->
+    <section id="screen-generate" class="screen">
+      <div class="gen-wrap">
+        <div class="gen-head">
+          <div class="gen-head-row">
+            <h2 class="net-label hidden" id="net-label">Network</h2>
+            <div class="graph-tabs">
+              <button id="tab-short" class="tab active" onclick="App.showGraph('short')">Short-profile network</button>
+              <button id="tab-long" class="tab" disabled onclick="App.showGraph('long')">
+                Long-profile network <span id="tab-long-badge" class="tab-badge"></span>
+              </button>
+            </div>
+            <div class="gen-head-right">
+              <span id="gen-status" class="gen-status-inline"><span id="gen-spinner" class="spinner"></span><span id="gen-msg">Starting…</span></span>
+              <button id="lp-btn" class="ghost small hidden" type="button" onclick="App.toggleLongProfile()">Long profile</button>
+              <button id="contrast-btn" class="ghost small hidden" type="button" onclick="Ext.findContrast()">Find a contrast patient</button>
+              <button id="chat-btn" class="primary small" type="button" onclick="App.goChat()">💬 Chat with patient</button>
+              <button class="ghost small" type="button" onclick="App.restart()">Start over</button>
+            </div>
+          </div>
+          <div class="legend" id="legend"></div>
+          <div class="ext-disclaimer hidden" data-ext-disclaimer></div>
+          <div class="layer-ctl hidden" id="layer-ctl"></div>
+        </div>
+
+        <div class="graph-stage" id="graph-stage">
+          <div id="graph-slot" class="graph-slot"></div>
+          <!-- overlay: waiting animation + explanation -->
+          <div id="graph-overlay" class="graph-overlay">
+            <canvas id="wait-canvas" class="wait-canvas"></canvas>
+            <div id="overlay-title" class="overlay-title">Generating…</div>
+            <div id="overlay-text" class="overlay-text"></div>
+            <div id="wait-tip" class="overlay-tip"></div>
+            <div class="pill-steps">
+              <span class="pill-step" id="step-short"><span class="dot"></span> Short-profile network</span>
+              <span class="pill-step" id="step-long-profile"><span class="dot"></span> Long profile (stage-1)</span>
+              <span class="pill-step" id="step-long"><span class="dot"></span> Long-profile network</span>
+            </div>
+          </div>
+          <!-- long-profile reader overlay -->
+          <div id="lp-overlay" class="lp-overlay hidden">
+            <div class="lp-panel">
+              <button class="assist-close" onclick="App.toggleLongProfile()">×</button>
+              <h3>Generated long profile</h3>
+              <div id="long-profile-view" class="lp-view"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHAT (angel stage-2 roleplay) -->
+    <section id="screen-chat" class="screen">
+      <div class="chat-split" id="chat-split">
+      <div class="card chat-card">
+        <div class="eval-page-title">
+          <div class="chat-title-row">
+            <h1 id="chat-title">Chat with the patient</h1>
+            <div class="title-actions">
+              <button id="chat-net-restore" class="ghost small hidden" type="button" onclick="Ext.toggleNet()" title="Show the network" aria-label="Show the network">» Network</button>
+              <button class="ghost small hidden" type="button" id="chat-contrast-btn" onclick="Ext.findContrast()">Find a contrast patient</button>
+              <button id="voice-toggle" class="voice-toggle hidden" type="button"
+                      onclick="App.toggleVoice()" title="Speak the patient's replies aloud">🔇 Voice off</button>
+              <button id="chat-export" class="ghost small hidden" type="button" onclick="Ext.exportAlignment()">Export JSON</button>
+              <button id="chat-paper" class="ghost small mi-paper hidden" type="button" onclick="Ext.togglePaper()">Paper view</button>
+            </div>
+          </div>
+          <p class="muted chat-sub-short hidden" id="chat-sub-short">You are the therapist; the simulated patient answers in role.
+            <span class="info-tip" tabindex="0" title="The patient (angel model) answers in role. The first reply may take a few minutes while the model warms up. Talk to them as you would a real client: asking the patient to summarise the session, give advice, or plan the next session can pull the model out of role. Under each reply, chips show which parts of the patient's network it expresses.">i</span></p>
+          <p class="muted" id="chat-sub">You are the therapist — type the first message. The patient (angel model) answers in role. The first reply may take a moment while the model warms up.<br>
+            Talk to them as you would a real client: asking the patient to summarise the session, give you advice, or plan the next session can pull the model out of role.</p>
+        </div>
+        <div id="chat-log" class="chat-log tall"></div>
+        <div class="starters hidden" id="chat-starters" aria-label="Suggested questions"></div>
+        <div class="chat-input">
+          <button id="chat-mic" class="mic-btn hidden" type="button" onclick="App.toggleMic()"
+                  title="Hold-free record: click to talk, click again to stop">🎙️</button>
+          <textarea id="chat-text" rows="2" autocomplete="off" placeholder="Type a message… (Enter to send, Shift+Enter for a newline)"></textarea>
+          <button class="primary" id="chat-send" type="button" onclick="App.sendChat()">Send</button>
+        </div>
+        <div class="actions chat-back"><button class="ghost" type="button" onclick="App.back()">← Back to graphs</button></div>
+      </div>
+      <!-- extension (DEMO_FEAT_ALIGN): network beside the dialogue -->
+      <div class="card chat-net hidden" id="chat-net-panel">
+        <div class="ext-disclaimer" data-ext-disclaimer></div>
+        <div class="chat-net-head">
+          <h3 id="chat-net-title">Network</h3>
+          <div class="legend legend-dots" id="chat-legend"></div>
+          <span class="explored-count" id="chat-explored"></span>
+          <span class="info-tip" tabindex="0" id="chat-net-hint" title="Hover a chip under a reply to find it in the network. Click a node to list the replies that mention it. Click a theme to expand it; double-click a node to collapse its theme.">i</span>
+          <span class="head-gap"></span>
+          <button class="icon-btn" type="button" id="chat-overview" title="Overview: collapse all themes" aria-label="Overview">Overview</button>
+          <button class="icon-btn" type="button" id="chat-fit" title="Fit to view" aria-label="Fit to view">Fit</button>
+          <details class="more-menu"><summary class="icon-btn" title="More graph options" aria-label="More graph options">⋯</summary><div class="layer-ctl" id="chat-graph-ctl"></div></details>
+          <button class="icon-btn" type="button" id="chat-net-toggle" onclick="Ext.toggleNet()" title="Hide the network" aria-label="Hide the network" aria-expanded="true">«</button>
+        </div>
+        <div class="chat-net-body">
+          <div class="graph-stage ext-graph chat-graph" id="chat-graph"></div>
+          <div class="ext-detail empty" id="chat-detail"></div>
+        </div>
+      </div>
+      <div class="ext-note hidden" id="chat-ext-note"></div>
+      </div>
+    </section>
+
+    <!-- extension (DEMO_FEAT_CONTRAST): F2 contrast-patient recommendation cards -->
+    <section id="screen-contrast" class="screen">
+      <div class="card ext-page">
+        <div class="ext-disclaimer" data-ext-disclaimer></div>
+        <div class="ext-page-head">
+          <div>
+            <h1 id="contrast-title">Contrast patients</h1>
+            <div class="query-meta" id="contrast-query-meta"></div>
+            <p class="muted" id="contrast-sub">Patients who look similar on the surface but whose networks explain it differently.</p>
+          </div>
+          <div class="head-btns"><button class="ghost small mi-paper" type="button" onclick="Ext.togglePaper()">Paper view</button>
+          <button class="ghost small" type="button" onclick="Ext.exportRecommendation()">Export JSON</button></div>
+        </div>
+        <div id="contrast-cards" class="contrast-cards"></div>
+      </div>
+    </section>
+
+    <!-- extension (DEMO_FEAT_DUAL): F3 dual-patient view -->
+    <section id="screen-dual" class="screen">
+      <div class="card ext-page dual-page">
+        <div class="ext-disclaimer" data-ext-disclaimer></div>
+        <div class="dual-titlebar">
+          <button type="button" class="ghost small dual-back hidden" id="dual-back-contrast" onclick="Ext.backToContrast()" title="Back to the contrast patients">&larr; Contrast patients</button>
+          <h1 class="dual-title" id="dual-title">
+            <span class="pname nm-a" id="dual-name-a" tabindex="0">A</span><span class="vs"> vs </span><span class="pname nm-b" id="dual-name-b" tabindex="0">B</span>
+            <span class="sep">·</span>
+            <span class="focus-wrap">
+              <button type="button" class="focus-btn" id="focus-btn" aria-haspopup="listbox" aria-expanded="false" onclick="Ext.toggleFocusMenu()"><span id="focus-name">…</span> ▾</button>
+              <div class="focus-menu hidden" id="focus-menu" role="listbox" aria-label="Focus symptom"></div>
+            </span>
+          </h1>
+          <details class="more-menu dual-more" id="dual-more">
+            <summary class="icon-btn" title="More" aria-label="More options">⋯</summary>
+            <div class="menu">
+              <button type="button" id="mi-full" onclick="Ext.toggleFull(); Ext.closeMenus()">Show full networks</button>
+              <button type="button" id="mi-all" onclick="Ext.toggleAllSymptoms(); Ext.closeMenus()">Show all symptoms</button>
+              <button type="button" id="mi-new" onclick="Ext.closeMenus(); Ext.newSession()">New session</button>
+              <button type="button" onclick="Ext.closeMenus(); Ext.openReplay()">See an example</button>
+              <button type="button" id="mi-paper" class="mi-paper" onclick="Ext.closeMenus(); Ext.togglePaper()">Paper view</button>
+              <button type="button" onclick="Ext.exportComparison(); Ext.closeMenus()">Export JSON</button>
+            </div>
+          </details>
+        </div>
+        <div class="cg-panel" id="cg-panel">
+          <div class="cg-body" id="cg-body">
+            <div id="dual-cg" class="cg-stage"></div>
+            <div id="dual-full-graphs" class="dual-full-graphs hidden"></div>
+          </div>
+          <div id="dual-cg-note" class="muted small"></div>
+        </div>
+        <div class="dual-traj hidden" id="dual-traj" aria-label="Conversation trajectory"></div>
+        <div class="dual-tabs" id="dual-tabs" role="tablist" aria-label="Patients"></div>
+        <div id="dual-turns" class="dual-turns"></div>
+        <div id="dual-status" class="muted small hidden"></div>
+        <div class="replay-bar hidden" id="replay-bar" aria-label="Example controls"></div>
+        <div class="starters dual-sugg" id="dual-sugg" aria-label="Suggested question"></div>
+        <div class="dual-inputbar">
+          <div class="seg" id="dual-seg" role="radiogroup" aria-label="Ask"></div>
+          <textarea id="dual-shared-text" rows="1" autocomplete="off" aria-label="Question"></textarea>
+          <button class="primary" id="dual-shared-send" type="button" onclick="Ext.sendDual()">Send</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="g-tip" class="g-tip"></div>
+  <script src="/static/app.js?v=pkg010a"></script>
+  <script src="/static/ext.js?v=pkg010a"></script>
+</body>
+</html>
