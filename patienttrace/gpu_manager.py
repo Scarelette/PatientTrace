@@ -62,6 +62,13 @@ def _die_with_parent() -> None:
 def start_local_worker(port: int, gpu_mem: Optional[float] = None, log_path: Optional[str] = None) -> str:
     """Start `python -m patienttrace.stage1_worker` on this machine; returns its URL."""
     global _proc
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:   # never talk to someone else's server
+        try:
+            s.bind(("127.0.0.1", port))
+        except OSError:
+            raise WorkerUnavailable(f"Port {port} is already in use, so the GPU worker cannot start there. "
+                                    f"Pick a free one with --worker-port.") from None
     env = dict(os.environ, WORKER_PRELOAD="chat")
     if gpu_mem is not None:
         env["VLLM_GPU_MEM"] = str(gpu_mem)

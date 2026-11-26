@@ -179,8 +179,12 @@ def cmd_serve(args) -> int:
     os.makedirs(P.LOG_DIR, exist_ok=True)
     from patienttrace import gpu_manager
     if args.start_worker:
-        url = gpu_manager.start_local_worker(args.worker_port, args.gpu_mem,
-                                             os.path.join(P.LOG_DIR, "worker.log"))
+        try:
+            url = gpu_manager.start_local_worker(args.worker_port, args.gpu_mem,
+                                                 os.path.join(P.LOG_DIR, "worker.log"))
+        except gpu_manager.WorkerUnavailable as exc:
+            print(exc, file=sys.stderr)
+            return 1
         print(f"Starting the GPU worker on this machine ({url}); log: {os.path.join(P.LOG_DIR, 'worker.log')}")
         print("The first live reply waits until the patient model has loaded (a few minutes on first use).")
     has_key = bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("AZURE_FOUNDRY_API_KEY"))
