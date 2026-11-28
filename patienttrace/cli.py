@@ -174,6 +174,9 @@ def cmd_serve(args) -> int:
         print(f"No patient data in {P.DATA_DIR}.\nRun `patienttrace download-data` first "
               "(or set PATIENTTRACE_DATA to the folder that holds it).", file=sys.stderr)
         return 1
+    if not os.path.exists(os.path.join(P.DATA_DIR, "fc", "calibration.json")):
+        print(f"Note: the patient data in {P.DATA_DIR} is from an earlier version (no Formulation Contrast examples).\n"
+              "      Run `patienttrace download-data --force` to update it.", file=sys.stderr)
     for k, v in SERVE_ENV.items():
         os.environ.setdefault(k, v)
     if args.base_path:

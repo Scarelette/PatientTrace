@@ -1,15 +1,27 @@
 # PatientTrace
 
 Interview a simulated mental-health patient and watch each reply being traced onto the patient's
-symptom network, find a contrast patient whose symptoms look similar but are caused differently,
-and compare two patients side by side.
+symptom network; then pick a look-alike patient (same presenting problem, different reasons behind it)
+and ask both the same questions to see where their formulations part ways.
+
+<p align="center"><img src="docs/media/formulation-contrast.gif" alt="Formulation Contrast: two patients answer the same questions; the gap between their tracks opens as their answers diverge" width="880"></p>
+
+**Screencast (2½ min, recorded examples only):** [docs/media/patienttrace-demo.mp4](docs/media/patienttrace-demo.mp4)
+
+| | |
+|---|---|
+| ![Symptom network](docs/screenshots/1-network.png) **Network**: each patient's symptom network (triggers, thoughts, feelings, body, behaviours) in a 2D or layered 3D view. | ![Interview](docs/screenshots/2-interview.png) **Interview**: each reply is matched to the network; its themes open, the path it travels is drawn, and a panel explains what the reply shows. |
+| ![Contrast picker](docs/screenshots/3-contrast-picker.png) **Contrast picker**: ranked look-alike patients with the shared symptoms and why the pair is worth comparing (causes stay hidden). | ![Formulation Contrast](docs/screenshots/4-formulation-contrast.png) **Formulation Contrast**: the same questions to both; the gap between the tracks, baskets of what each revealed, the trainee's reflection, then an AI reading. |
+| ![End of round](docs/screenshots/5-end-of-round.png) **End of round**: each patient's distinctive causes (found / not reached, with a hint), reflections next to the gap, a learning point. | |
 
 The demo runs in two modes:
 
 | Mode | What works | Needs |
 |---|---|---|
-| **Browse / replay** | 330 patient profiles and their symptom networks, contrast-patient recommendations, recorded side-by-side interviews | Python 3.10+ only (no GPU, no API key) |
-| **Live** | Everything above, plus live interviews with the patient model, reply tracing, and live side-by-side comparison | One NVIDIA GPU for the patient model and an Anthropic API key |
+| **Browse / replay** | 330 patient profiles and their symptom networks, the contrast picker, recorded Interview examples (Emily, Leila) and recorded Formulation Contrast rounds (Max vs Natasha, Emily vs Evelyn) | Python 3.10+ only (no GPU, no API key) |
+| **Live** | Everything above, plus live interviews with the patient model (streamed replies, traced as they arrive) and live Formulation Contrast rounds with any look-alike pair | One NVIDIA GPU for the patient model and an Anthropic API key |
+
+Simulated patients for clinical-skills training only: not real people, and not a clinical or diagnostic tool.
 
 ## 1. Install
 
@@ -29,6 +41,7 @@ patienttrace download-data         # unpacks into ~/.cache/patienttrace/data
 ```
 
 To keep the data elsewhere, pass `--dest DIR` and set `PATIENTTRACE_DATA=DIR` before serving.
+If you installed an earlier version, update the data too: `patienttrace download-data --force`.
 
 ## 3. Run
 
@@ -38,9 +51,15 @@ To keep the data elsewhere, pass `--dest DIR` and set `PATIENTTRACE_DATA=DIR` be
 patienttrace serve
 ```
 
-Open http://localhost:7860. Pick **Use an existing profile**, choose a patient, then
-**Find a contrast patient**, or click **See an example** on the start page for a recorded
-side-by-side interview.
+Open http://localhost:7860 and pick **Use an existing profile**. A guided path:
+
+1. Choose **Emily** (or **Leila**): the Network page shows her symptom network.
+2. Under **Interview**, click **Watch a recorded example**: the interview replays, each reply opening the
+   network themes it touches. Hover or click a reply to see its explanation.
+3. Under **Formulation Contrast**, click **Watch a recorded example** (Max vs Natasha): press **Play**, pick a
+   reflection on a turn, open **Compare with an AI reading**, then **Finish and compare** for the reveal.
+4. **Formulation Contrast** (the button) opens the contrast picker for the current patient; starting a round
+   needs live mode.
 
 ### Live mode
 
