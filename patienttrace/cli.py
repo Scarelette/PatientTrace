@@ -27,6 +27,10 @@ SERVE_ENV = {
     "DEMO_FEAT_CUSTOM": "0",
     "DEMO_EXT_ALIGN_TIMEOUT_S": "10", "F3_ALIGN_TIMEOUT_S": "20", "F3_DIFF_TIMEOUT_S": "45",
     "PATIENT_MODEL_TIMEOUT_S": "90", "DEMO_WORKER_HTTP_TIMEOUT": "90", "DEMO_THREADPOOL": "200",
+    # live turns fail fast instead of hanging: one model call at most 40 s, 2 attempts (routes add a 45 s cap)
+    "LLM_HTTP_TIMEOUT": "40", "LLM_MAX_RETRIES": "2", "PATIENTTRACE_STREAM_TIMEOUT": "60",
+    # older paths that wait for the worker (non-streaming chat, the old dual view) give up after 20 s, not 15 min
+    "DEMO_GPU_READY_SECONDS": "20",
 }
 
 
@@ -170,6 +174,9 @@ def cmd_serve(args) -> int:
         print(f"No patient data in {P.DATA_DIR}.\nRun `patienttrace download-data` first "
               "(or set PATIENTTRACE_DATA to the folder that holds it).", file=sys.stderr)
         return 1
+    if not os.path.exists(os.path.join(P.DATA_DIR, "fc", "calibration.json")):
+        print(f"Note: the patient data in {P.DATA_DIR} is from an earlier version (no Formulation Contrast examples).\n"
+              "      Run `patienttrace download-data --force` to update it.", file=sys.stderr)
     for k, v in SERVE_ENV.items():
         os.environ.setdefault(k, v)
     if args.base_path:

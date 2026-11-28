@@ -35,7 +35,33 @@ class WorkerUnavailable(RuntimeError):
 
 
 def worker_url() -> str:
-    return os.environ.get("ANGEL_WORKER_URL", "").strip().rstrip("/")
+    """ANGEL_WORKER_URL, or (PATIENTTRACE_WORKER_FILE) the host/port a worker job wrote into its state file:
+    then live mode follows the worker job, on when it runs and off when it ends, without restarting the app."""
+    u = os.environ.get("ANGEL_WORKER_URL", "").strip().rstrip("/")
+    if u:
+        return u
+    f = os.environ.get("PATIENTTRACE_WORKER_FILE", "").strip()
+    if f:
+        try:
+            import json
+            with open(f, encoding="utf-8") as fh:
+                d = json.load(fh)
+            return f"http://{d['host']}:{d['port']}"
+        except Exception:  # noqa: BLE001
+            return ""
+    return ""
+
+
+_FILE_LIVE = {"t": 0.0, "ok": False}
+
+
+def http():
+    """requests for the GPU worker: always direct, never through an HTTP proxy from the environment. A site
+    proxy can cache GET /health (a worker that has gone keeps looking alive) and adds a hop to every reply."""
+    import requests
+    s = requests.Session()
+    s.trust_env = False
+    return s
 
 
 def mode() -> str:
@@ -45,6 +71,12 @@ def mode() -> str:
 
 
 def live_enabled() -> bool:
+    if os.environ.get("PATIENTTRACE_WORKER_FILE") and not os.environ.get("ANGEL_WORKER_URL") and _proc is None:
+        import time as _t
+        if _t.time() - _FILE_LIVE["t"] > 15:          # worker from a state file: live only while it answers
+            u = worker_url()
+            _FILE_LIVE.update(t=_t.time(), ok=bool(u) and _healthy(u))
+        return _FILE_LIVE["ok"]
     return mode() != "none"
 
 
@@ -97,7 +129,7 @@ def touch() -> None:
 
 def _healthy(url: str) -> bool:
     try:
-        r = requests.get(url + "/health", timeout=HEALTH_TIMEOUT)
+        r = http().get(url + "/health", timeout=HEALTH_TIMEOUT)
         return r.ok and bool(r.json().get("ready", True))
     except Exception:  # noqa: BLE001
         return False

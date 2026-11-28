@@ -33,4 +33,4 @@ patienttrace = "patienttrace.cli:main"
 include = ["patienttrace*"]
 
 [tool.setuptools.package-data]
-patienttrace = ["static/*"]
+patienttrace = ["static/*", "static/vendor/*/*"]

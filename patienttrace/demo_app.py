@@ -33,7 +33,7 @@ from typing import Any, Dict, List, Optional
 
 import anthropic
 import requests
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -126,7 +126,7 @@ def _expand_profile(short_text: str) -> Dict[str, Any]:
     """Stage-1 on the on-demand GPU worker: allocate/reuse a GPU, then POST the
     short profile text and get the long profile back."""
     url = gpu_manager.ensure_worker()          # blocks until a GPU worker is ready
-    r = requests.post(url + "/expand", json={"short_text": short_text}, timeout=WORKER_TIMEOUT)
+    r = gpu_manager.http().post(url + "/expand", json={"short_text": short_text}, timeout=WORKER_TIMEOUT)
     r.raise_for_status()
     return r.json()
 
@@ -258,7 +258,7 @@ def _run_job(jid: str, profile: Dict[str, Any]) -> None:
     # long graph runs on the API) so a later chat's first reply is fast.
     def _warm_stage2():
         try:
-            requests.post(gpu_manager.ensure_worker() + "/warm_chat", timeout=WORKER_TIMEOUT)
+            gpu_manager.http().post(gpu_manager.ensure_worker() + "/warm_chat", timeout=WORKER_TIMEOUT)
         except Exception:  # noqa: BLE001
             pass
     threading.Thread(target=_warm_stage2, daemon=True).start()
@@ -330,13 +330,50 @@ async def index():                      # async: served on the event loop, indep
     return HTMLResponse(html)
 
 
+@app.get("/api/health")
+async def api_health():
+    """Liveness only: never touches the patient model, the GPU or any API (see /api/live-status for those)."""
+    return {"ok": True, "time": time.time()}
+
+
+def _is_admin(request) -> bool:
+    """Direct requests (on the node, or an SSH tunnel) see the admin block; requests through the public Cloudflare
+    tunnel carry cf-connecting-ip and do not."""
+    return "cf-connecting-ip" not in request.headers
+
+
+@app.get("/api/live-status")
+def api_live_status(request: Request):
+    """{patient_model: up|starting|down, phase, gpu_queue, last_latency_ms, detail}: cached ~15 s, a short ping and
+    the Slurm queue, never the model. Admin view (direct requests only): worker jobs (id, start, limit), autostart."""
+    from patienttrace import live
+    return live.public_status(live.live_status(), _is_admin(request))
+
+
+@app.post("/api/live/warm")
+def api_live_warm(request: Request):
+    """Opening Interview / Formulation Contrast in live mode: warm the model if it is up, or (autostart on) start a
+    worker if none runs. Never waits."""
+    from patienttrace import live
+    return live.public_status(live.warm(), _is_admin(request))
+
+
 @app.get("/api/config")
 def config():
     from patienttrace import ext_routes
     return {"profile_fields": PROFILE_FIELDS, "speaking_style_defaults": SPEAKING_STYLE_DEFAULTS,
             "empty_profile": empty_profile(), "audio": audio_service.audio_available(),
-            "ext": ({"flags": ext_routes.flags(), "disclaimer": ext_routes.DISCLAIMER}
+            "ext": ({"flags": ext_routes.flags(), "disclaimer": ext_routes.DISCLAIMER,
+                     "live_missing": _live_missing()}
                     if ext_routes.any_on() else None)}
+
+
+def _live_missing():
+    from patienttrace import live
+    try:
+        return live.missing()
+    except Exception as exc:  # noqa: BLE001
+        return [f"live check failed: {exc}"]
 
 
 @app.get("/api/status")
@@ -404,11 +441,20 @@ class ChatStartReq(BaseModel):
     # Supplying it makes the actor role-play the EXPANDED profile rather than the
     # profile as authored — the two stages chain instead of forking.
     long_profile: Optional[Any] = None   # dict; a list wrapper is unwrapped below
+    # conversation so far ([{role: therapist|patient, content}]): resumes a live session after a server restart
+    conversation: List[Dict[str, str]] = []
 
 
 class ChatSendReq(BaseModel):
     session_id: str
     message: str
+
+
+class ChatStreamReq(BaseModel):
+    session_id: str
+    message: str
+    stream_id: str = ""                    # lets the Stop button cancel this stream
+    patient_id: str = ""                   # for the latency log
 
 
 # Observer fields the schema adapter has no slot for (the rich schema is flatter),
@@ -487,17 +533,14 @@ def chat_start(req: ChatStartReq):
     sp = build_patient_system_prompt(profile_text)
     sid = uuid.uuid4().hex[:12]
     with CHAT_LOCK:
-        CHAT[sid] = {"system_prompt": sp, "conversation": [], "profile": req.profile,
+        seed = [{"role": t.get("role"), "content": t.get("content", "")} for t in (req.conversation or [])
+                if t.get("role") in ("therapist", "patient") and (t.get("content") or "").strip()]
+        CHAT[sid] = {"system_prompt": sp, "conversation": seed, "profile": req.profile,
                      "profile_source": profile_source}
     gpu_manager.touch()
 
-    def _prewarm_chat():   # allocate GPU + load the roleplay model while the user reads/types
-        try:
-            url = gpu_manager.ensure_worker()
-            requests.post(url + "/warm_chat", timeout=WORKER_TIMEOUT)
-        except Exception:  # noqa: BLE001
-            pass
-    threading.Thread(target=_prewarm_chat, daemon=True).start()
+    from patienttrace import live as _live
+    threading.Thread(target=_live.warm, daemon=True).start()   # warm the model while the user types; never waits
 
     ident = req.profile.get("identity", {}) or {}
     return {"session_id": sid, "patient_name": ident.get("name") or "the patient",
@@ -517,7 +560,7 @@ def chat_send(req: ChatSendReq):
     url = gpu_manager.ensure_worker()
     convo = sess["conversation"] + [{"role": "therapist", "content": msg}]
     try:
-        r = requests.post(url + "/chat",
+        r = gpu_manager.http().post(url + "/chat",
                           json={"system_prompt": sess["system_prompt"], "conversation": convo},
                           timeout=WORKER_TIMEOUT)
         r.raise_for_status()
@@ -529,6 +572,41 @@ def chat_send(req: ChatSendReq):
         sess["conversation"].append({"role": "therapist", "content": msg})
         sess["conversation"].append({"role": "patient", "content": reply})
     return {"reply": reply}
+
+
+@app.post("/api/chat/stream")
+def chat_stream(req: ChatStreamReq):
+    """Live Interview turn, streamed (NDJSON): {"text": cumulative} ... {"done", "reply", timings} or
+    {"error"} ({"retry"} when the first attempt failed before any text). The conversation advances only
+    when the reply finished, so a failed or stopped turn can be retried with the same question."""
+    from patienttrace import live
+    from patienttrace.ext_routes import STOPS
+    with CHAT_LOCK:
+        sess = CHAT.get(req.session_id)
+    if sess is None:
+        raise HTTPException(status_code=404, detail="unknown or expired chat session")
+    msg = (req.message or "").strip()
+    if not msg:
+        raise HTTPException(status_code=400, detail="empty message")
+    gpu_manager.touch()
+    stop = STOPS.setdefault(req.stream_id or uuid.uuid4().hex, threading.Event())
+    turn = len(sess["conversation"]) // 2 + 1
+    convo = sess["conversation"] + [{"role": "therapist", "content": msg}]
+
+    def gen():
+        try:
+            for ev in live.stream_reply(sess["system_prompt"], convo, stop):
+                if ev.get("done"):
+                    with CHAT_LOCK:
+                        sess["conversation"] += [{"role": "therapist", "content": msg}, {"role": "patient", "content": ev["reply"]}]
+                    live.log_step(page="interview", patient=req.patient_id, turn=turn, step="patient_reply", ok=True,
+                                  **{k: ev.get(k) for k in ("ms", "gen_ms", "first_token_ms", "tokens_in", "tokens_out", "attempts", "retried", "gpu_util", "gpu_mem_mb", "gpu_name", "mock")})
+                elif ev.get("error") and not ev.get("retry"):
+                    live.log_step(page="interview", patient=req.patient_id, turn=turn, step="patient_reply", ok=False, error=ev["error"], ms=ev.get("ms"))
+                yield json.dumps({**ev, "turn": turn}, ensure_ascii=False) + "\n"
+        finally:
+            STOPS.pop(req.stream_id, None)
+    return StreamingResponse(gen(), media_type="application/x-ndjson")
 
 
 @app.post("/api/chat/transcribe")

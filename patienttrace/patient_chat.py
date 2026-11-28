@@ -60,6 +60,21 @@ def _cap_sentences(text: str, max_sentences: int = 4) -> str:
     return " ".join(parts[:max_sentences]).strip()
 
 
+_END = re.compile(r"[.!?…][\"”’)\]]*$")
+
+
+def finish_sentences(text: str) -> str:
+    """Never end a reply mid-sentence: if the text stops without a sentence end (the token budget ran out), cut
+    back to the last complete sentence; with no complete sentence at all, close the fragment with an ellipsis."""
+    t = (text or "").rstrip()
+    if not t or _END.search(t):
+        return t
+    ends = [m.end() for m in re.finditer(r"[.!?…][\"”’)\]]*(?=\s)", t)]
+    if ends and ends[-1] >= 12:
+        return t[:ends[-1]].rstrip()
+    return t.rstrip(" ,;:—–-") + "…"
+
+
 def clean_reply(text: str, max_sentences: int = 4) -> str:
     """The stage-2 model emits training scaffolding (<think>…</think>, wraps the
     reply in <patient>…</patient>, and can repeat itself). Extract the clean

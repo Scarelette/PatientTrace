@@ -6,3 +6,10 @@ dist/
 .venv/
 data/
 *.tar.gz
+data-local/
+.venv/
+shots/
+.state/
+.devserver.log
+scripts/site.env
+.devserver*.log

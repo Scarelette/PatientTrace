@@ -68,7 +68,7 @@ class PatientModel:
             text = clean_reply(self._worker.chat(req)["reply"] or "")
         else:
             import requests
-            r = requests.post(self.url.rstrip("/") + "/chat",
+            r = __import__("patienttrace.gpu_manager", fromlist=["http"]).http().post(self.url.rstrip("/") + "/chat",
                               json={"system_prompt": system_prompt, "conversation": conversation,
                                     "max_tokens": max_tokens, "temperature": temperature},
                               timeout=self.timeout)

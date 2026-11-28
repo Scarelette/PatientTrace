@@ -150,7 +150,7 @@ class LLMClient:
     _MIN_MAX_TOKENS = {"claude-fable-5": 1500}
 
     def __init__(self, cache_dir: str = DEFAULT_CACHE_DIR, log_path: str = DEFAULT_LOG_PATH,
-                 use_cache: bool = True, max_retries: int = 6,
+                 use_cache: bool = True, max_retries: Optional[int] = None,
                  concurrency: Optional[Dict[str, int]] = None):
         _load_secrets_env()
         # Provider: Azure AI Foundry when AZURE_FOUNDRY_API_KEY is set (the setup used for the paper),
@@ -168,7 +168,9 @@ class LLMClient:
             if model_family(j) == mf:
                 raise RuntimeError(f"judge {j} is the same family ({mf}) as METHOD_MODEL {self.method_model}")
         self.cache_dir, self.log_path = cache_dir, log_path
-        self.use_cache, self.max_retries = use_cache, max_retries
+        # the web server sets LLM_MAX_RETRIES / LLM_HTTP_TIMEOUT low (cli.SERVE_ENV) so a live turn fails fast;
+        # batch scripts keep the patient defaults
+        self.use_cache, self.max_retries = use_cache, (max_retries if max_retries is not None else int(os.environ.get("LLM_MAX_RETRIES", "6")))
         conc = {"anthropic": 8, "openai": 12, "embed": 4}
         for k in conc:   # env override, e.g. LLM_CONC_ANTHROPIC=24
             if os.environ.get(f"LLM_CONC_{k.upper()}"):
@@ -188,13 +190,13 @@ class LLMClient:
                 if self.foundry:
                     from anthropic import AnthropicFoundry
                     self._anthropic = AnthropicFoundry(api_key=self._key, resource=self.resource,
-                                                       max_retries=0, timeout=300)
+                                                       max_retries=0, timeout=float(os.environ.get("LLM_HTTP_TIMEOUT", "300")))
                 else:
                     if not os.environ.get("ANTHROPIC_API_KEY"):
                         raise RuntimeError("ANTHROPIC_API_KEY is not set (needed for live alignment "
                                            "and difference summaries)")
                     from anthropic import Anthropic
-                    self._anthropic = Anthropic(max_retries=0, timeout=300)
+                    self._anthropic = Anthropic(max_retries=0, timeout=float(os.environ.get("LLM_HTTP_TIMEOUT", "300")))
         return self._anthropic
 
     def _openai_client(self):
@@ -203,11 +205,11 @@ class LLMClient:
                 from openai import OpenAI
                 if self.foundry:
                     self._openai = OpenAI(base_url=f"https://{self.resource}.openai.azure.com/openai/v1/",
-                                          api_key=self._key, max_retries=0, timeout=300)
+                                          api_key=self._key, max_retries=0, timeout=float(os.environ.get("LLM_HTTP_TIMEOUT", "300")))
                 else:
                     if not os.environ.get("OPENAI_API_KEY"):
                         raise RuntimeError("OPENAI_API_KEY is not set")
-                    self._openai = OpenAI(max_retries=0, timeout=300)
+                    self._openai = OpenAI(max_retries=0, timeout=float(os.environ.get("LLM_HTTP_TIMEOUT", "300")))
         return self._openai
 
     # -- cache / log ---------------------------------------------------------
