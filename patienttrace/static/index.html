@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PatientTrace</title>
-  <link rel="stylesheet" href="/static/styles.css?v=pkg010a" />
+  <link rel="stylesheet" href="/static/styles.css?v=fc54" />
   <script>
     try { var t = localStorage.getItem("demoTheme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}
   </script>
@@ -15,7 +15,7 @@
       <button id="back-btn" class="back-btn hidden" onclick="App.back()">&larr; Back</button>
       <div class="brand">Patient Profile → Network Model</div>
       <nav class="steps hidden" id="steps" aria-label="Progress">
-        <span data-step="profile">Profile</span><i>→</i><span data-step="network">Network</span><i>→</i><span data-step="interview">Interview</span><i>→</i><span data-step="compare">Compare</span>
+        <span data-step="profile">Profile</span><i>→</i><span data-step="network">Network</span><i>→</i><span data-step="interview">Interview</span><i>→</i><span data-step="compare">Formulation Contrast</span>
       </nav>
     </div>
     <div class="topbar-right">
@@ -103,19 +103,26 @@
             </div>
             <div class="gen-head-right">
               <span id="gen-status" class="gen-status-inline"><span id="gen-spinner" class="spinner"></span><span id="gen-msg">Starting…</span></span>
+              <span class="live-badge hidden" id="net-livebadge" aria-live="polite"></span>
               <button id="lp-btn" class="ghost small hidden" type="button" onclick="App.toggleLongProfile()">Long profile</button>
-              <button id="contrast-btn" class="ghost small hidden" type="button" onclick="Ext.findContrast()">Find a contrast patient</button>
-              <button id="chat-btn" class="primary small" type="button" onclick="App.goChat()">💬 Chat with patient</button>
+              <div class="entry" id="iv-entry"><span class="btn-wrap"><button id="chat-btn" class="primary small" type="button" onclick="App.goChat()">💬 Chat with patient</button><span class="live-dot hidden" id="iv-dot" role="img"></span></span>
+                <button id="iv-rec-link" class="rec-link hidden" type="button" onclick="App.watchExample()">Watch a recorded example</button></div>
+              <div class="entry" id="fc-entry"><span class="btn-wrap"><button id="contrast-btn" class="primary small hidden" type="button" onclick="Ext.pickContrast()">Formulation Contrast</button><span class="live-dot hidden" id="fc-dot" role="img"></span></span>
+                <button id="fc-rec-link" class="rec-link hidden" type="button" onclick="FC.openRecorded()">Watch a recorded example</button></div>
               <button class="ghost small" type="button" onclick="App.restart()">Start over</button>
             </div>
           </div>
           <div class="legend" id="legend"></div>
           <div class="ext-disclaimer hidden" data-ext-disclaimer></div>
           <div class="layer-ctl hidden" id="layer-ctl"></div>
+          <div class="insight-ctl hidden" id="insight-ctl"></div>
         </div>
 
         <div class="graph-stage" id="graph-stage">
           <div id="graph-slot" class="graph-slot"></div>
+          <aside id="net-panel" class="net-panel hidden" aria-label="Details" aria-live="polite"></aside>
+          <div id="net-bar" class="net-bar hidden" role="status" aria-live="polite"></div>
+          <div id="net-hint" class="net-hint hidden"></div>
           <!-- overlay: waiting animation + explanation -->
           <div id="graph-overlay" class="graph-overlay">
             <canvas id="wait-canvas" class="wait-canvas"></canvas>
@@ -195,6 +202,64 @@
     </section>
 
     <!-- extension (DEMO_FEAT_CONTRAST): F2 contrast-patient recommendation cards -->
+    <section id="screen-interview" class="screen">
+      <div class="iv-app">
+        <header class="iv-top">
+          <div class="iv-who"><div class="iv-avatar" id="iv-avatar" aria-hidden="true">?</div>
+            <div><div class="iv-name" id="iv-name"></div><div class="iv-sub" id="iv-sub"></div></div></div>
+          <span class="live-badge hidden" id="iv-livebadge" aria-live="polite"></span>
+          <span class="iv-cov" id="iv-cov"></span>
+          <span class="iv-exbadge hidden" id="iv-exbadge">Recorded example</span>
+          <button id="iv-play" class="ghost small iv-play" type="button" hidden><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 0.5v9l8-4.5z" fill="currentColor"/></svg><span>Replay recorded example</span></button>
+          <button id="iv-contrast" class="primary small hidden" type="button">Contrast with a look-alike patient →</button>
+        </header>
+        <div class="iv-grid">
+          <div class="iv-left">
+            <div class="iv-card">
+              <div class="iv-card-h"><h2>Symptom network</h2><span class="iv-analyzing hidden" id="iv-analyzing" aria-live="polite"></span><span class="iv-cap" id="iv-netcap"></span></div>
+              <div class="iv-svgwrap"><svg id="iv-net" role="img"></svg></div>
+              <div class="iv-legend" id="iv-legend"></div>
+              <div class="iv-unexp" id="iv-unexp"></div>
+            </div>
+            <div class="iv-card" id="iv-detail" aria-live="polite"></div>
+          </div>
+          <section class="iv-card iv-chat" aria-label="Interview transcript">
+            <ol id="iv-log"></ol>
+            <div class="iv-hint hidden" id="iv-hint"></div>
+            <div class="iv-err hidden" id="iv-err" role="alert"><span></span><button type="button" class="ghost small">Retry</button></div>
+            <div class="iv-off hidden" id="iv-off"></div>
+            <div class="iv-composer"><input id="iv-draft" aria-label="Your question"><button id="iv-send" class="primary small" type="button">Send</button><button id="iv-stop" class="ghost small hidden" type="button">Stop</button></div>
+            <div class="live-note iv-disc" data-ext-footnote></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-fc" class="screen">
+      <div class="fc-app">
+        <header class="fc-head">
+          <div class="fc-row1"><h1>Formulation Contrast</h1><span class="fc-recbadge hidden" id="fc-recbadge">Recorded example</span><span class="live-badge hidden" id="fc-livebadge" aria-live="polite"></span>
+            <div class="fc-ctl" id="fc-ctl"></div></div>
+          <div class="fc-row2"><span class="fc-subt">Same presentation, different formulation</span><span class="fc-dotsep">·</span><span class="fc-meta" id="fc-meta"></span><p class="fc-intro hidden" id="fc-intro"><span></span><button type="button" class="fc-intro-x" aria-label="Dismiss the intro">✕</button></p></div>
+        </header>
+        <div class="fc-grid">
+          <section class="fc-card fc-traj" aria-label="Conversation trajectory">
+            <div class="fc-traj-h"><h2>Conversation trajectory</h2><p class="fc-note">Gap = how differently they have been answering. Click a turn to reread it.</p></div>
+            <div class="fc-svgwrap" id="fc-svgwrap"><svg id="fc-svg" role="img" aria-label="Two tracks, one per patient; the vertical gap at each question shows how differently they answered"></svg></div>
+            
+          </section>
+          <aside class="fc-card fc-bask" aria-label="Baskets">
+            <h2>Baskets</h2>
+            <div id="fc-cover" class="fc-cover" aria-label="Formulation parts reached per patient"></div><div id="fc-baskets"></div>
+            <p class="fc-note">Baskets only collect. No scores, no “correct” marks: you decide what tells them apart.</p>
+          </aside>
+        </div>
+        <section class="fc-card fc-hist" id="fc-hist" aria-label="Conversation history"><h2>Conversation</h2><div id="fc-rows" aria-live="polite"></div><div class="fc-recbar hidden" id="fc-recbar"><span>This is a recorded example.</span><button type="button" class="fc-try-link" id="fc-try2">Try it yourself →</button></div><div class="fc-live hidden" id="fc-live"><input id="fc-q" type="text" placeholder="Ask both patients the same question…" aria-label="Question for both patients"><button id="fc-ask" class="primary small" type="button">Ask both</button><button id="fc-stop" class="ghost small hidden" type="button">Stop</button><span class="muted small" id="fc-status"></span>
+              <div class="fc-off hidden" id="fc-off"></div><div class="fc-progress hidden" id="fc-progress" aria-hidden="true"><i></i></div><div class="fc-err hidden" id="fc-err" role="alert"><span></span><button type="button" class="ghost small">Retry</button></div><div class="live-note" data-ext-footnote></div></div></section>
+        <section class="fc-card fc-reveal hidden" id="fc-reveal" aria-live="polite"></section>
+      </div>
+    </section>
+
     <section id="screen-contrast" class="screen">
       <div class="card ext-page">
         <div class="ext-disclaimer" data-ext-disclaimer></div>
@@ -260,7 +325,11 @@
   </main>
 
   <div id="g-tip" class="g-tip"></div>
-  <script src="/static/app.js?v=pkg010a"></script>
-  <script src="/static/ext.js?v=pkg010a"></script>
+  <script src="/static/flow.js?v=fc54"></script>
+  <script type="module" src="/static/net3d.js?v=fc54"></script>
+  <script src="/static/app.js?v=fc54"></script>
+  <script src="/static/ext.js?v=fc54"></script>
+  <script src="/static/interview.js?v=fc54"></script>
+  <script src="/static/fc.js?v=fc54"></script>
 </body>
 </html>

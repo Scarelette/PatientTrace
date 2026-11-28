@@ -1,0 +1,419 @@
+<title>Layered Patient Network</title>
+<style>
+:root { --bg:#fbfbfd; --card:#fff; --ink:#1d1d1f; --muted:#6e6e73; --line:#d2d2d7; --accent:#0071e3;
+  --t-stimulus:#ff9f0a; --t-emotion:#ff375f; --t-cognition:#0a84ff; --t-behavior:#30d158; --t-physio:#bf5af2; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#000; --card:#1c1c1e; --ink:#f5f5f7; --muted:#b4b4b9; --line:#38383a; --accent:#0a84ff; color-scheme:dark; } }
+:root[data-theme="dark"] { --bg:#000; --card:#1c1c1e; --ink:#f5f5f7; --muted:#b4b4b9; --line:#38383a; --accent:#0a84ff; color-scheme:dark; }
+body { margin:0; background:var(--bg); color:var(--ink); font:14px -apple-system, "Segoe UI", Roboto, sans-serif; }
+.bar { padding-left:max(16px, env(safe-area-inset-left,0px)) !important; padding-right:max(16px, env(safe-area-inset-right,0px)) !important; display:flex; gap:8px; align-items:center; padding:10px 16px; flex-wrap:wrap; }
+.bar .hint { color:var(--muted); margin-right:auto; }
+button:disabled { opacity:.45; cursor:default; }
+button { font:inherit; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
+.wrap { position:relative; height:calc(100vh - 54px); }
+#stage { position:absolute; inset:0; }
+#info { position:absolute; right:16px; top:12px; width:320px; max-width:calc(100% - 32px); max-height:70%; overflow:auto; background:var(--card); border:1px solid var(--line);
+  border-radius:14px; padding:12px 14px; box-shadow:0 4px 30px rgba(0,0,0,.08); }
+#info.hidden { display:none; } #info h4 { margin:0 0 4px; } #info .meta { color:var(--muted); font-size:12px; margin-bottom:8px; }
+#info li { margin:4px 0; } #info .ev { color:var(--muted); font-size:12px; }
+#tip { position:absolute; z-index:5; pointer-events:none; max-width:280px; background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:6px 9px; font-size:12px; line-height:1.35; box-shadow:0 4px 18px rgba(0,0,0,.12); }
+#tip b { display:block; font-weight:600; } #tip span { color:var(--muted); }
+.legend { display:flex; gap:12px; color:var(--muted); font-size:12px; } .sw { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; vertical-align:-1px; }
+</style>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js", "three/addons/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js" } }</script>
+<div class="bar">
+  <span class="hint" id="hint">Click a theme to open the layer of detailed nodes beneath it</span>
+  <span class="legend" id="legend"></span>
+  <button id="b-exp">Expand all</button><button id="b-col" disabled>Back to 2D</button>
+</div>
+<div class="wrap"><div id="stage"></div><div id="info" class="hidden"></div><div id="tip" hidden></div></div>
+<script>window.NET = {"nodes": [{"name": "Skipping medical appointments when possible", "type": "Behavior"}, {"name": "Changing the subject when health topics arise", "type": "Behavior"}, {"name": "Avoiding hospital environments, resulting in delayed care", "type": "Behavior"}, {"name": "Frequently checking heart rate via smartphone", "type": "Behavior"}, {"name": "Excessive online symptom-searching for reassurance", "type": "Behavior"}, {"name": "Social withdrawal to avoid medical-related discussions", "type": "Behavior"}, {"name": "Withdrawing into silence when distressed", "type": "Behavior"}, {"name": "Deflecting distress with dry humor", "type": "Behavior"}, {"name": "Avoiding disclosure of childhood trauma", "type": "Behavior"}, {"name": "anticipatory anxiety", "type": "Emotion"}, {"name": "emotional numbness", "type": "Emotion"}, {"name": "fear of appearing weak", "type": "Emotion"}, {"name": "shame about past hospitalizations", "type": "Emotion"}, {"name": "fear of being judged as overreacting", "type": "Emotion"}, {"name": "panic", "type": "Emotion"}, {"name": "Episodic fast heartbeat (tachycardia)", "type": "Physiological Sensation"}, {"name": "Panic-like bodily sensations", "type": "Physiological Sensation"}, {"name": "Insomnia with frequent nighttime awakenings", "type": "Physiological Sensation"}, {"name": "Chronic fatigue", "type": "Physiological Sensation"}, {"name": "Medical settings are inherently threatening", "type": "Cognition"}, {"name": "My body is unreliable and unpredictable", "type": "Cognition"}, {"name": "This chest tightness means my heart is failing again", "type": "Cognition"}, {"name": "They'll ask me to undergo another surgery soon", "type": "Cognition"}, {"name": "No one will understand how scared I am", "type": "Cognition"}, {"name": "What if I can't work anymore due to health complications?", "type": "Cognition"}, {"name": "Will my heart ever be 'normal'?", "type": "Cognition"}, {"name": "What if I have to be sedated again and can't wake up?", "type": "Cognition"}, {"name": "Medical professionals are unsympathetic", "type": "Cognition"}, {"name": "Medical appointments", "type": "Stimulus"}, {"name": "Health-related conversations", "type": "Stimulus"}, {"name": "Mentions of surgery, anesthesia, or diagnostic tests", "type": "Stimulus"}, {"name": "Hospital environments", "type": "Stimulus"}, {"name": "Childhood traumatic medical experiences (early hospitalizations)", "type": "Stimulus"}, {"name": "Chronic congenital heart condition with uncertain prognosis", "type": "Stimulus"}, {"name": "Geographical distance from specialty care and social contacts", "type": "Stimulus"}], "edges": [{"from": "Skipping medical appointments when possible", "to": "anticipatory anxiety", "evidence": "Avoidance of medical topics listed as maintaining factor; skipping appointments preserves anticipatory anxiety"}, {"from": "Skipping medical appointments when possible", "to": "Medical settings are inherently threatening", "evidence": "Avoiding appointments prevents disconfirmation of 'medical settings are threatening'"}, {"from": "Avoiding hospital environments, resulting in delayed care", "to": "Medical settings are inherently threatening", "evidence": "Avoidance of hospital environments maintains guarded, cautious view of healthcare"}, {"from": "Avoiding hospital environments, resulting in delayed care", "to": "anticipatory anxiety", "evidence": "Avoidance of medical discussions and hospital environments listed as maintaining factor for anxiety"}, {"from": "Frequently checking heart rate via smartphone", "to": "anticipatory anxiety", "evidence": "Overreliance on symptom-checking listed as maintaining factor for anxiety"}, {"from": "Excessive online symptom-searching for reassurance", "to": "anticipatory anxiety", "evidence": "Overreliance on online symptom-checking maintains persistent preoccupation and anxiety"}, {"from": "Excessive online symptom-searching for reassurance", "to": "This chest tightness means my heart is failing again", "evidence": "Excessive online research about symptoms sustains catastrophic heart interpretations"}, {"from": "Excessive online symptom-searching for reassurance", "to": "Insomnia with frequent nighttime awakenings", "evidence": "Insomnia with racing thoughts about health follows excessive symptom research"}, {"from": "Excessive online symptom-searching for reassurance", "to": "My body is unreliable and unpredictable", "evidence": "Persistent preoccupation with potential heart complications maintained by searching"}, {"from": "Social withdrawal to avoid medical-related discussions", "to": "No one will understand how scared I am", "evidence": "Few close friends due to social withdrawal; feels disconnected, 'no one will understand'"}, {"from": "Withdrawing into silence when distressed", "to": "No one will understand how scared I am", "evidence": "Withdraws into silence when distressed, blocking others from understanding her fear"}, {"from": "Avoiding disclosure of childhood trauma", "to": "anticipatory anxiety", "evidence": "Unaddressed childhood trauma from hospital experiences listed as maintaining factor"}, {"from": "Avoiding disclosure of childhood trauma", "to": "No one will understand how scared I am", "evidence": "Guarded, avoids disclosure; discontinued therapy after feeling misunderstood"}, {"from": "Changing the subject when health topics arise", "to": "anticipatory anxiety", "evidence": "Changing the subject on health topics maintains avoidance-driven anticipatory anxiety"}, {"from": "anticipatory anxiety", "to": "Episodic fast heartbeat (tachycardia)", "evidence": "Episodic tachycardia especially when contemplating medical scenarios"}, {"from": "anticipatory anxiety", "to": "Panic-like bodily sensations", "evidence": "panic-like sensations when contemplating medical scenarios"}, {"from": "anticipatory anxiety", "to": "Insomnia with frequent nighttime awakenings", "evidence": "Insomnia characterized by racing thoughts about health and medical procedures"}, {"from": "anticipatory anxiety", "to": "Excessive online symptom-searching for reassurance", "evidence": "Persistent preoccupation with potential heart complications leading to excessive online research"}, {"from": "anticipatory anxiety", "to": "Skipping medical appointments when possible", "evidence": "Avoidance of medical discussions... resulting in delayed care"}, {"from": "anticipatory anxiety", "to": "Avoiding hospital environments, resulting in delayed care", "evidence": "Avoidance of hospital environments, often resulting in delayed care"}, {"from": "anticipatory anxiety", "to": "panic", "evidence": "panic-like sensations escalate during medical reminders and anticipated medical scenarios"}, {"from": "anticipatory anxiety", "to": "Chronic fatigue", "evidence": "Chronic fatigue from emotional exhaustion and disrupted sleep patterns"}, {"from": "panic", "to": "Episodic fast heartbeat (tachycardia)", "evidence": "Episodic fast heartbeat accompanied by panic-like sensations"}, {"from": "fear of appearing weak", "to": "Withdrawing into silence when distressed", "evidence": "Withdraws into silence when distressed; fears being judged"}, {"from": "fear of appearing weak", "to": "Deflecting distress with dry humor", "evidence": "deflects with dry humor when distressed rather than showing vulnerability"}, {"from": "fear of being judged as overreacting", "to": "Changing the subject when health topics arise", "evidence": "fears being judged for her health concerns; changes subject on health topics"}, {"from": "fear of being judged as overreacting", "to": "Social withdrawal to avoid medical-related discussions", "evidence": "Social withdrawal to avoid medical-related discussions; fears being judged for health concerns"}, {"from": "fear of being judged as overreacting", "to": "No one will understand how scared I am", "evidence": "feels disconnected from others in support groups; felt misunderstood in therapy"}, {"from": "fear of being judged as overreacting", "to": "Excessive online symptom-searching for reassurance", "evidence": "seeks reassurance online rather than risking being judged as overreacting by professionals"}, {"from": "Episodic fast heartbeat (tachycardia)", "to": "Panic-like bodily sensations", "evidence": "Episodic tachycardia accompanied by panic-like sensations"}, {"from": "Episodic fast heartbeat (tachycardia)", "to": "Frequently checking heart rate via smartphone", "evidence": "Frequently checking heart rate via smartphone in response to fast heartbeat episodes"}, {"from": "Episodic fast heartbeat (tachycardia)", "to": "This chest tightness means my heart is failing again", "evidence": "Episodes interpreted as heart complications: 'chest tightness means my heart is failing again'"}, {"from": "Episodic fast heartbeat (tachycardia)", "to": "Excessive online symptom-searching for reassurance", "evidence": "Preoccupation with heart complications leading to excessive online research about symptoms"}, {"from": "Episodic fast heartbeat (tachycardia)", "to": "My body is unreliable and unpredictable", "evidence": "Unpredictable fast heartbeat episodes 3-5 times weekly reinforce belief body is unreliable"}, {"from": "Panic-like bodily sensations", "to": "panic", "evidence": "Panic-like sensations especially when contemplating medical scenarios escalate into panic"}, {"from": "Panic-like bodily sensations", "to": "Excessive online symptom-searching for reassurance", "evidence": "Overreliance on online symptom-checking as reassurance for bodily sensations"}, {"from": "Panic-like bodily sensations", "to": "My body is unreliable and unpredictable", "evidence": "Panic-like bodily sensations feed belief 'my body is unreliable and unpredictable'"}, {"from": "Insomnia with frequent nighttime awakenings", "to": "Chronic fatigue", "evidence": "Chronic fatigue from emotional exhaustion and disrupted sleep patterns"}, {"from": "Medical settings are inherently threatening", "to": "Avoiding hospital environments, resulting in delayed care", "evidence": "Avoidance of hospital environments, often resulting in delayed care"}, {"from": "Medical settings are inherently threatening", "to": "anticipatory anxiety", "evidence": "escalation after routine check-up; anxiety when contemplating medical scenarios"}, {"from": "My body is unreliable and unpredictable", "to": "Excessive online symptom-searching for reassurance", "evidence": "persistent preoccupation with heart complications leading to excessive online research"}, {"from": "This chest tightness means my heart is failing again", "to": "panic", "evidence": "panic-like sensations especially when contemplating medical scenarios"}, {"from": "This chest tightness means my heart is failing again", "to": "Panic-like bodily sensations", "evidence": "episodic tachycardia accompanied by panic-like sensations"}, {"from": "This chest tightness means my heart is failing again", "to": "Episodic fast heartbeat (tachycardia)", "evidence": "fast heartbeat episodes with intensity increasing during medical reminders"}, {"from": "This chest tightness means my heart is failing again", "to": "Excessive online symptom-searching for reassurance", "evidence": "excessive online research about symptoms for reassurance"}, {"from": "They'll ask me to undergo another surgery soon", "to": "anticipatory anxiety", "evidence": "escalation after check-up where concerns were noted; racing thoughts about medical procedures"}, {"from": "No one will understand how scared I am", "to": "Withdrawing into silence when distressed", "evidence": "withdraws into silence when distressed; felt misunderstood in therapy"}, {"from": "No one will understand how scared I am", "to": "Social withdrawal to avoid medical-related discussions", "evidence": "few close friends due to social withdrawal; feels disconnected from support groups"}, {"from": "No one will understand how scared I am", "to": "Avoiding disclosure of childhood trauma", "evidence": "resists emotional intimacy; guarded about deeper fears and past trauma"}, {"from": "Will my heart ever be 'normal'?", "to": "Excessive online symptom-searching for reassurance", "evidence": "seeks reassurance; excessive online research about symptoms"}, {"from": "Will my heart ever be 'normal'?", "to": "Insomnia with frequent nighttime awakenings", "evidence": "racing thoughts about health with difficulty initiating sleep"}, {"from": "What if I have to be sedated again and can't wake up?", "to": "Avoiding hospital environments, resulting in delayed care", "evidence": "fear of losing control during procedures maintains avoidance of hospital environments"}, {"from": "What if I have to be sedated again and can't wake up?", "to": "panic", "evidence": "panic-like sensations when contemplating medical scenarios like sedation"}, {"from": "What if I have to be sedated again and can't wake up?", "to": "Insomnia with frequent nighttime awakenings", "evidence": "insomnia with racing thoughts about medical procedures"}, {"from": "Medical professionals are unsympathetic", "to": "Skipping medical appointments when possible", "evidence": "discontinued therapy after feeling misunderstood; skips appointments"}, {"from": "Medical professionals are unsympathetic", "to": "fear of being judged as overreacting", "evidence": "fears being judged for her health concerns"}, {"from": "Medical appointments", "to": "anticipatory anxiety", "evidence": "escalation after a routine check-up where concerns were noted"}, {"from": "Medical appointments", "to": "Skipping medical appointments when possible", "evidence": "skipping medical appointments; avoidance of medical topics maintains symptoms"}, {"from": "Medical appointments", "to": "Episodic fast heartbeat (tachycardia)", "evidence": "fast heartbeat episodes intensify during medical reminders"}, {"from": "Medical appointments", "to": "They'll ask me to undergo another surgery soon", "evidence": "check-up where concerns were noted; fears another surgery"}, {"from": "Health-related conversations", "to": "Changing the subject when health topics arise", "evidence": "changing the subject when health topics arise"}, {"from": "Health-related conversations", "to": "Social withdrawal to avoid medical-related discussions", "evidence": "social withdrawal to avoid medical-related discussions"}, {"from": "Health-related conversations", "to": "anticipatory anxiety", "evidence": "avoidance of medical discussions; anxiety around medical reminders"}, {"from": "Mentions of surgery, anesthesia, or diagnostic tests", "to": "What if I have to be sedated again and can't wake up?", "evidence": "fear of losing control during procedures; sedation fear"}, {"from": "Mentions of surgery, anesthesia, or diagnostic tests", "to": "Panic-like bodily sensations", "evidence": "panic-like sensations especially when contemplating medical scenarios"}, {"from": "Mentions of surgery, anesthesia, or diagnostic tests", "to": "panic", "evidence": "panic-like sensations triggered by medical scenarios"}, {"from": "Mentions of surgery, anesthesia, or diagnostic tests", "to": "Insomnia with frequent nighttime awakenings", "evidence": "insomnia with racing thoughts about medical procedures"}, {"from": "Hospital environments", "to": "Avoiding hospital environments, resulting in delayed care", "evidence": "avoidance of hospital environments, often resulting in delayed care"}, {"from": "Hospital environments", "to": "panic", "evidence": "PTSD-related symptoms tied to hospital experiences"}, {"from": "Hospital environments", "to": "Medical settings are inherently threatening", "evidence": "cautious, guarded approach to healthcare; hospitals as threat"}, {"from": "Childhood traumatic medical experiences (early hospitalizations)", "to": "Medical settings are inherently threatening", "evidence": "early hospitalizations marked by isolation shaped cautious approach to healthcare"}, {"from": "Childhood traumatic medical experiences (early hospitalizations)", "to": "Avoiding disclosure of childhood trauma", "evidence": "avoiding disclosure; deeper fears related to past trauma require trust-building"}, {"from": "Childhood traumatic medical experiences (early hospitalizations)", "to": "No one will understand how scared I am", "evidence": "hospitalizations marked by isolation and lack of emotional support; felt misunderstood"}, {"from": "Childhood traumatic medical experiences (early hospitalizations)", "to": "Medical professionals are unsympathetic", "evidence": "early hospitalizations lacked emotional support"}, {"from": "Childhood traumatic medical experiences (early hospitalizations)", "to": "What if I have to be sedated again and can't wake up?", "evidence": "multiple cardiac surgeries by age 10; fear of sedation and losing control"}, {"from": "Chronic congenital heart condition with uncertain prognosis", "to": "My body is unreliable and unpredictable", "evidence": "congenital heart condition with uncertain prognosis; body unpredictable"}, {"from": "Chronic congenital heart condition with uncertain prognosis", "to": "This chest tightness means my heart is failing again", "evidence": "persistent preoccupation with potential heart complications"}, {"from": "Chronic congenital heart condition with uncertain prognosis", "to": "Will my heart ever be 'normal'?", "evidence": "uncertain prognosis; will my heart ever be normal"}, {"from": "Chronic congenital heart condition with uncertain prognosis", "to": "Excessive online symptom-searching for reassurance", "evidence": "excessive online research about symptoms; overreliance on online symptom-checking"}, {"from": "Chronic congenital heart condition with uncertain prognosis", "to": "Insomnia with frequent nighttime awakenings", "evidence": "insomnia characterized by racing thoughts about health"}], "groups": [{"label": "Avoidance Behaviors", "type": "Behavior", "members": ["Skipping medical appointments when possible", "Changing the subject when health topics arise", "Avoiding hospital environments, resulting in delayed care", "Social withdrawal to avoid medical-related discussions", "Avoiding disclosure of childhood trauma"]}, {"label": "Health Anxiety Behaviors", "type": "Behavior", "members": ["Frequently checking heart rate via smartphone", "Excessive online symptom-searching for reassurance"]}, {"label": "Distress Coping Behaviors", "type": "Behavior", "members": ["Withdrawing into silence when distressed", "Deflecting distress with dry humor"]}, {"label": "Anticipatory Anxiety", "type": "Emotion", "members": ["anticipatory anxiety", "panic"]}, {"label": "Emotional Suppression", "type": "Emotion", "members": ["emotional numbness", "fear of appearing weak", "shame about past hospitalizations", "fear of being judged as overreacting"]}, {"label": "Physiological Distress", "type": "Physiological Sensation", "members": ["Episodic fast heartbeat (tachycardia)", "Panic-like bodily sensations", "Insomnia with frequent nighttime awakenings", "Chronic fatigue"]}, {"label": "Threat Perceptions", "type": "Cognition", "members": ["Medical settings are inherently threatening", "My body is unreliable and unpredictable", "This chest tightness means my heart is failing again"]}, {"label": "Future Uncertainty", "type": "Cognition", "members": ["They'll ask me to undergo another surgery soon", "What if I can't work anymore due to health complications?", "Will my heart ever be 'normal'?", "What if I have to be sedated again and can't wake up?"]}, {"label": "Interpersonal Mistrust", "type": "Cognition", "members": ["No one will understand how scared I am", "Medical professionals are unsympathetic"]}, {"label": "Medical Triggers", "type": "Stimulus", "members": ["Medical appointments", "Health-related conversations", "Mentions of surgery, anesthesia, or diagnostic tests", "Hospital environments"]}, {"label": "Traumatic Memories", "type": "Stimulus", "members": ["Childhood traumatic medical experiences (early hospitalizations)"]}, {"label": "Chronic Illness Impact", "type": "Stimulus", "members": ["Chronic congenital heart condition with uncertain prognosis"]}, {"label": "Access Barriers", "type": "Stimulus", "members": ["Geographical distance from specialty care and social contacts"]}]};
+</script>
+<script type="module">
+// Patient network that starts as a flat 2D graph of themes. Clicking a theme tilts the view into 3D
+// and grows a layer under that theme holding its detailed nodes; closing the last theme glides back to 2D.
+// Input g = { nodes:[{name,type}], edges:[{from,to,evidence}], groups:[{label,type,members:[name]}] }
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const TYPE_VAR = { "Stimulus": "--t-stimulus", "Emotion": "--t-emotion", "Cognition": "--t-cognition",
+  "Behavior": "--t-behavior", "Physiological Sensation": "--t-physio" };
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const colorFor = t => css(TYPE_VAR[t] || "--muted") || "#888";
+const DEPTH = 85;                                     // how far below a theme its layer sits
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const OPEN_MS = REDUCED ? 1 : 1100, CLOSE_MS = REDUCED ? 1 : 750, CAM_MS = REDUCED ? 1 : 1300;
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;   // ease-in-out cubic
+const easeOutBack = t => { const c = 1.4; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+
+// ---------------- layout: themes as a 2D graph, each with room for its layer ----------------
+function layout(g) {
+  const gi = {}; g.groups.forEach((grp, i) => grp.members.forEach(m => { gi[m] = i; }));
+  const discR = g.groups.map(grp => grp.members.length <= 1 ? 10 : 14 + 9 * Math.sqrt(grp.members.length));
+  const n = g.groups.length;
+  const th = g.groups.map((_, i) => { const a = 2 * Math.PI * i / n; return { x: Math.cos(a) * 60, z: Math.sin(a) * 60, vx: 0, vz: 0 }; });
+  const agg = {};
+  g.edges.forEach(e => { const a = gi[e.from], b = gi[e.to]; if (a == null || b == null || a === b) return;
+    const k = Math.min(a, b) + "|" + Math.max(a, b); agg[k] = (agg[k] || 0) + 1; });
+  const links = Object.entries(agg).map(([k, w]) => { const [s, t] = k.split("|").map(Number); return { s, t, w }; });
+  for (let it = 0; it < 500; it++) {                 // springs + repulsion + gravity
+    const cool = 1 - it / 500;
+    th.forEach((a, i) => { a.vx = -a.x * 0.012; a.vz = -a.z * 0.012;
+      th.forEach((b, j) => { if (i === j) return; const dx = a.x - b.x, dz = a.z - b.z, d2 = dx * dx + dz * dz + 0.01, d = Math.sqrt(d2);
+        const f = 2600 / d2; a.vx += f * dx / d; a.vz += f * dz / d; }); });
+    links.forEach(({ s, t, w }) => { const a = th[s], b = th[t], dx = b.x - a.x, dz = b.z - a.z, d = Math.hypot(dx, dz) + 0.01;
+      const f = (d - (discR[s] + discR[t] + 20)) * 0.012 * Math.min(3, w); a.vx += f * dx / d; a.vz += f * dz / d; b.vx -= f * dx / d; b.vz -= f * dz / d; });
+    th.forEach(p => { const h = Math.hypot(p.vx, p.vz) + 1e-9, m = Math.min(5, h) * cool; p.x += p.vx / h * m; p.z += p.vz / h * m; });
+  }
+  for (let it = 0; it < 300; it++)                  // no two layers may overlap once opened
+    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+      const a = th[i], b = th[j], dx = b.x - a.x, dz = b.z - a.z, d = Math.hypot(dx, dz) + 1e-6, min = discR[i] + discR[j] + 10;
+      if (d < min) { const push = (min - d) / 2; a.x -= dx / d * push; a.z -= dz / d * push; b.x += dx / d * push; b.z += dz / d * push; }
+    }
+  const cx = th.reduce((s, p) => s + p.x, 0) / n, cz = th.reduce((s, p) => s + p.z, 0) / n;
+  th.forEach(p => { p.x -= cx; p.z -= cz; });
+  // members: evenly around their theme's layer, in an order that keeps linked nodes next to each other
+  const mem = {};
+  g.groups.forEach((grp, i) => {
+    const ms = grp.members.slice(), k = ms.length, r = k <= 1 ? 0 : discR[i] * 0.66;
+    ms.forEach((m, j) => { const a = 2 * Math.PI * j / Math.max(1, k) - Math.PI / 2; mem[m] = { dx: Math.cos(a) * r, dz: Math.sin(a) * r }; });
+  });
+  const bound = Math.max(...th.map((p, i) => Math.hypot(p.x, p.z) + discR[i])) + 10;
+  return { gi, th, discR, mem, bound };
+}
+
+// ---------------- drawing helpers ----------------
+function textSprite(text, { size = 26, weight = 500, color, bg, maxW = 300, maxLines = 2 } = {}) {
+  const c = document.createElement("canvas"), x = c.getContext("2d"), dpr = 2;
+  const font = `${weight} ${size}px -apple-system, "Segoe UI", Roboto, sans-serif`;
+  x.font = font; const words = text.split(/\s+/), lines = []; let cur = "";
+  words.forEach(w => { const t = cur ? cur + " " + w : w; if (x.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; });
+  if (cur) lines.push(cur);
+  if (lines.length > maxLines) {                      // clamp to maxLines with an ellipsis; full text is in the tooltip
+    lines.length = maxLines; let l = lines[maxLines - 1];
+    while (x.measureText(l + "…").width > maxW && l.includes(" ")) l = l.slice(0, l.lastIndexOf(" "));
+    lines[maxLines - 1] = l.replace(/[,;:.]$/, "") + "…";
+  }
+  const w = Math.ceil(Math.max(...lines.map(l => x.measureText(l).width))) + 18, lh = size * 1.18, h = Math.ceil(lines.length * lh) + 10;
+  c.width = w * dpr; c.height = h * dpr; x.scale(dpr, dpr); x.font = font;
+  if (bg) { x.fillStyle = bg; x.beginPath(); x.roundRect(0, 0, w, h, 9); x.fill(); }
+  x.fillStyle = color; x.textBaseline = "top"; x.textAlign = "center";
+  lines.forEach((l, i) => x.fillText(l, w / 2, 5 + i * lh));
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthWrite: false, depthTest: false, transparent: true }));
+  s.center.set(0.5, 1); s.renderOrder = 10;
+  Object.assign(s.userData, { pw: w, ph: h, size, a: 1 });
+  return s;
+}
+
+// ---------------- the view ----------------
+function render3D(container, g, opts = {}) {
+  const dark = document.documentElement.dataset.theme === "dark" ||
+    (document.documentElement.dataset.theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+  const ink = css("--ink") || "#1d1d1f", muted = css("--muted") || "#6e6e73", accent = css("--accent") || "#0071e3";
+  const labelBg = dark ? "rgba(28,28,30,0.78)" : "rgba(255,255,255,0.82)";
+  const L = layout(g);
+
+  const W = () => container.clientWidth, H = () => container.clientHeight;
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: !!opts.preserve });
+  renderer.setPixelRatio(Math.min(2, devicePixelRatio)); renderer.setSize(W(), H());
+  container.appendChild(renderer.domElement);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, W() / H(), 1, 4000);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.47; controls.minDistance = 80; controls.maxDistance = 1400;
+  scene.add(new THREE.AmbientLight(0xffffff, 1.7));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(60, 220, 120); scene.add(sun);
+
+  // camera poses: straight down (2D) and tilted (3D); each pose is fitted so the visible graph fills the view
+  const V = (x, y, z) => new THREE.Vector3(x, y, z), vf = new THREE.Vector3();
+  const themeR = g.groups.map(grp => 3.6 + Math.min(5, Math.sqrt(grp.members.length) * 1.9));
+  function framePoints(openIdx) {
+    const pts = [];
+    L.th.forEach((p, i) => { const r = themeR[i] + 4;
+      pts.push(V(p.x + r + 10, 0, p.z), V(p.x - r - 10, 0, p.z), V(p.x, 0, p.z - r), V(p.x, 0, p.z + r + 10)); });
+    openIdx.forEach(i => { const p = L.th[i], R = L.discR[i];
+      for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; pts.push(V(p.x + Math.cos(a) * R, -DEPTH, p.z + Math.sin(a) * R)); }
+      pts.push(V(p.x, -DEPTH, p.z + R + 10)); });
+    return pts;
+  }
+  const probe = new THREE.PerspectiveCamera();
+  function fitPose(phi, theta, openIdx) {
+    const pts = framePoints(openIdx), target = new THREE.Box3().setFromPoints(pts).getCenter(V(0, 0, 0));
+    probe.fov = camera.fov; probe.aspect = camera.aspect; probe.near = 1; probe.far = 6000; probe.updateProjectionMatrix();
+    let r = 900; const right = V(0, 0, 0), up = V(0, 0, 0);
+    for (let it = 0; it < 8; it++) {               // re-center and re-scale until the projected bounds fill ~86% of the view
+      probe.position.setFromSpherical(new THREE.Spherical(r, phi, theta)).add(target); probe.lookAt(target); probe.updateMatrixWorld();
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      pts.forEach(p => { vf.copy(p).project(probe); x0 = Math.min(x0, vf.x); x1 = Math.max(x1, vf.x); y0 = Math.min(y0, vf.y); y1 = Math.max(y1, vf.y); });
+      const halfH = r * Math.tan(THREE.MathUtils.degToRad(probe.fov / 2)), halfW = halfH * probe.aspect;
+      right.setFromMatrixColumn(probe.matrixWorld, 0); up.setFromMatrixColumn(probe.matrixWorld, 1);
+      target.addScaledVector(right, (x0 + x1) / 2 * halfW).addScaledVector(up, (y0 + y1) / 2 * halfH);
+      r = Math.min(1400, Math.max(80, r * Math.max((x1 - x0) / 2, (y1 - y0) / 2) / 0.86));
+    }
+    return { target, r, phi, theta };
+  }
+  let openList = [], refDist = 300;
+  const POSE = {
+    flat: () => fitPose(0.0001, 0, []),
+    // lean toward the theme just opened, so its new layer is in front of the viewer
+    focus: i => { const p = L.th[i];
+      return fitPose(THREE.MathUtils.degToRad(58), Math.abs(p.x) + Math.abs(p.z) > 1 ? Math.atan2(p.x, p.z) * 0.35 : 0, openList); },
+  };
+  const placeCamera = p => { const s = new THREE.Spherical(p.r, p.phi, p.theta);
+    camera.position.setFromSpherical(s).add(p.target); controls.target.copy(p.target); camera.lookAt(p.target); };
+  { const p0 = POSE.flat(); refDist = p0.r; placeCamera(p0); } controls.enableRotate = false;   // 2D: pan and zoom only
+  let camTween = null, mode = "flat";
+  function goPose(name, arg) {
+    mode = name === "flat" ? "flat" : "3d"; const off = camera.position.clone().sub(controls.target), s = new THREE.Spherical().setFromVector3(off);
+    camTween = { t0: performance.now(), from: { target: controls.target.clone(), r: s.radius, phi: s.phi, theta: s.theta }, to: POSE[name](arg) };
+    controls.enabled = false; controls.enableRotate = name !== "flat";
+  }
+
+  const pickables = [];
+  // themes on the top plane
+  const themes = g.groups.map((grp, i) => {
+    const p = L.th[i], col = new THREE.Color(colorFor(grp.type)), r = 3.6 + Math.min(5, Math.sqrt(grp.members.length) * 1.9);
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(r, 36, 18), new THREE.MeshStandardMaterial({ color: col, roughness: 0.45, transparent: true, opacity: 1 }));
+    mesh.position.set(p.x, 0, p.z); scene.add(mesh);
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(r + 2, 0.45, 8, 56), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0 }));
+    halo.rotation.x = Math.PI / 2; halo.position.copy(mesh.position); scene.add(halo);
+    const lab = textSprite(grp.members.length > 1 ? `${grp.label} (${grp.members.length})` : grp.label, { size: 28, weight: 650, color: ink, bg: labelBg, maxW: 300 });
+    lab.position.copy(mesh.position); Object.assign(lab.userData, { r, px: 13, ti: i }); scene.add(lab);
+    // the layer that grows under this theme
+    const layer = new THREE.Group(); layer.position.set(p.x, -DEPTH, p.z); layer.scale.setScalar(0.001); layer.visible = false; scene.add(layer);
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(L.discR[i], 64), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+    disc.rotation.x = -Math.PI / 2; layer.add(disc);
+    const rim = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 80 }, (_, k) => { const a = k / 80 * Math.PI * 2; return new THREE.Vector3(Math.cos(a) * L.discR[i], 0, Math.sin(a) * L.discR[i]); })),
+      new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0 })); layer.add(rim);
+    // a translucent funnel from the theme down to its layer
+    const funnel = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.9, L.discR[i], DEPTH, 48, 1, true),
+      new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+    funnel.position.set(p.x, -DEPTH / 2, p.z); funnel.visible = false; scene.add(funnel);
+    mesh.userData = { kind: "theme", i }; pickables.push(mesh);
+    return { grp, mesh, halo, lab, layer, disc, rim, funnel, r, open: false, t: 0, tStart: 0, tFrom: 0, dim: 1 };
+  });
+  // detailed nodes, waiting inside their theme
+  const members = {};
+  g.nodes.forEach(n => {
+    const i = L.gi[n.name], T = themes[i], col = new THREE.Color(colorFor(n.type)), off = L.mem[n.name] || { dx: 0, dz: 0 };
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(2.4, 24, 12), new THREE.MeshStandardMaterial({ color: col, roughness: 0.5, transparent: true, opacity: 0 }));
+    const lab = textSprite(n.name, { size: 26, color: ink, bg: labelBg, maxW: 330 }); Object.assign(lab.userData, { r: 2.4, px: 12, name: n.name, base: 0 });
+    const stem = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]),
+      new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0 }));
+    [mesh, lab, stem].forEach(o => { o.visible = false; scene.add(o); });
+    mesh.userData = { kind: "node", name: n.name }; pickables.push(mesh);
+    const home = new THREE.Vector3(T.mesh.position.x + off.dx, -DEPTH, T.mesh.position.z + off.dz);
+    members[n.name] = { n, i, T, mesh, lab, stem, home };
+  });
+
+  // ---- labels: fixed screen size, hung just below their sphere; when two collide the less important one fades ----
+  function layoutLabels() {
+    const Hh = H(), Ww = W(), tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), anyOpen = openList.length > 0;
+    const focus = selected || hoverNode, near = new Set();
+    if (focus) g.edges.forEach(e => { if (e.from === focus) near.add(e.to); if (e.to === focus) near.add(e.from); });
+    const items = [];
+    [...themes.map(T => T.lab), ...Object.values(members).map(m => m.lab)].forEach(l => {
+      if (!l.visible) return;
+      const u = l.userData, dist = camera.position.distanceTo(l.position), ppw = Hh / (2 * dist * tanH);
+      const k = u.px / u.size * Math.min(1.35, Math.max(0.85, Math.sqrt(refDist / dist)));
+      const pw = u.pw * k, ph = u.ph * k, gap = u.r * ppw + 4;
+      l.scale.set(pw / ppw, ph / ppw, 1); l.center.set(0.5, 1 + gap / ph);
+      vf.copy(l.position).project(camera);
+      const sx = (vf.x + 1) / 2 * Ww, sy = (1 - vf.y) / 2 * Hh + gap;
+      const pr = u.name != null ? (u.name === focus ? 100 : near.has(u.name) ? 50 : 10)
+        : (themes[u.ti].open ? 20 : 5 + g.groups[u.ti].members.length * 0.1 - (anyOpen ? 3 : 0));
+      items.push({ l, pr, rect: [sx - pw / 2, sy, sx + pw / 2, sy + ph], off: vf.z > 1 });
+    });
+    items.sort((a, b) => b.pr - a.pr);
+    const kept = [];
+    items.forEach(({ l, rect, off }) => {
+      const u = l.userData, base = u.base ?? 1;
+      const hit = off || kept.some(r => !(rect[2] < r[0] || rect[0] > r[2] || rect[3] < r[1] || rect[1] > r[3]));
+      if (!hit && base > 0.3) kept.push(rect);
+      u.a += ((hit ? 0 : 1) - u.a) * (REDUCED ? 1 : 0.2);
+      l.material.opacity = u.a * base * (u.dim ?? 1);
+    });
+  }
+
+  // ---- edges: structure rebuilt when the set of open themes changes, positions updated every frame ----
+  const edgeGroup = new THREE.Group(); scene.add(edgeGroup);
+  let edgeList = [], selected = null, hoverNode = null;
+  const endOf = name => { const m = members[name]; if (!m) return null; return m.T.open || m.T.t > 0 ? { obj: m.mesh, node: name } : { obj: m.T.mesh, theme: m.i }; };
+  const UP = new THREE.Vector3(0, 1, 0);
+  function rebuildEdges() {
+    edgeGroup.children.forEach(o => { o.geometry.dispose(); o.material.dispose(); }); edgeGroup.clear(); edgeList = [];
+    const agg = {};
+    g.edges.forEach(e => {
+      const a = endOf(e.from), b = endOf(e.to); if (!a || !b) return;
+      if (a.theme != null && a.theme === b.theme) return;
+      const k = (a.node || "t" + a.theme) + "|" + (b.node || "t" + b.theme);
+      (agg[k] = agg[k] || { a, b, w: 0, e: [] }).w++; agg[k].e.push(e);
+    });
+    Object.values(agg).forEach(({ a, b, w, e }) => {
+      const both = !!(a.node && b.node), cross = !!a.node !== !!b.node;
+      const focus = selected || hoverNode;
+      const hit = !!focus && e.some(x => x.from === focus || x.to === focus), dim = !!focus && !hit;
+      if (cross && !hit) return;                     // node↔closed-theme links only appear for the hovered/selected node
+      const col = hit ? accent : colorFor(a.node ? members[a.node].n.type : g.groups[a.theme].type);   // colored by source type
+      const op = dim ? 0.05 : hit ? 0.95 : both ? 0.7 : cross ? 0.16 : Math.min(0.75, 0.3 + 0.1 * w);
+      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]),
+        cross && !hit ? new THREE.LineDashedMaterial({ color: col, transparent: true, opacity: op, dashSize: 2.5, gapSize: 2.5 })
+          : new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: op }));
+      const width = both || cross ? 0.8 : Math.min(1.8, 0.7 + 0.2 * w);
+      const cone = cross && !hit ? null : new THREE.Mesh(new THREE.ConeGeometry(1.1 * width, 3.4 * width, 10), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op }));
+      edgeGroup.add(line); if (cone) edgeGroup.add(cone);
+      edgeList.push({ a: a.obj, b: b.obj, line, cone, cross, baseOp: op, rB: b.theme != null ? themes[b.theme].r : 2.4 });
+    });
+    updateEdges();
+  }
+  const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), dir = new THREE.Vector3();
+  function updateEdges() {
+    edgeList.forEach(E => {
+      tmpA.copy(E.a.position); tmpB.copy(E.b.position);
+      E.line.geometry.setFromPoints([tmpA, tmpB]); if (E.cross) E.line.computeLineDistances();
+      const vis = E.a.visible && E.b.visible; E.line.visible = vis; if (E.cone) E.cone.visible = vis;
+      const opA = E.a.material.opacity ?? 1, opB = E.b.material.opacity ?? 1, f = Math.min(opA, opB);
+      E.line.material.opacity = E.baseOp * f;
+      if (E.cone && vis) { dir.copy(tmpB).sub(tmpA); const len = dir.length(); if (len < 1e-3) { E.cone.visible = false; return; } dir.normalize();
+        E.cone.position.copy(tmpB).addScaledVector(dir, -(E.rB + 2)); E.cone.quaternion.setFromUnitVectors(UP, dir); E.cone.material.opacity = E.baseOp * f; }
+    });
+  }
+
+  // ---- opening and closing ----
+  const openCount = () => themes.filter(t => t.open).length;
+  function setOpen(i, open) {
+    const T = themes[i]; if (T.open === open) return;
+    T.open = open; T.tStart = performance.now(); T.tFrom = T.t;
+    if (!open && selected && T.grp.members.includes(selected)) select(null, true);
+    openList = themes.map((t, j) => t.open ? j : -1).filter(j => j >= 0);
+    if (open) goPose("focus", i);
+    else if (!openList.length) goPose("flat");
+    else goPose("focus", openList[openList.length - 1]);
+    rebuildEdges();
+    opts.onChange && opts.onChange(openCount(), themes.length);
+  }
+  function select(name, quiet) {
+    selected = name;
+    Object.values(members).forEach(m => m.mesh.scale.setScalar(m.n.name === name ? 1.7 : 1));
+    rebuildEdges();
+    if (quiet || !opts.onSelect) return;
+    if (!name) return opts.onSelect(null);
+    const m = members[name];
+    opts.onSelect({ name, type: m.n.type, theme: g.groups[m.i]?.label, out: g.edges.filter(e => e.from === name), inn: g.edges.filter(e => e.to === name) });
+  }
+
+  // ---- picking: click (not drag) a theme to open/close it, a node to show its links ----
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(); let down = null, hover = null;
+  const pick = ev => { const r = renderer.domElement.getBoundingClientRect();
+    ptr.set((ev.clientX - r.left) / r.width * 2 - 1, -(ev.clientY - r.top) / r.height * 2 + 1); ray.setFromCamera(ptr, camera);
+    const hit = ray.intersectObjects(pickables.filter(o => o.visible))[0]; return hit && hit.object; };
+  const el = renderer.domElement;
+  el.addEventListener("pointerdown", ev => { down = [ev.clientX, ev.clientY]; });
+  el.addEventListener("pointerup", ev => {
+    if (!down || Math.hypot(ev.clientX - down[0], ev.clientY - down[1]) > 5) return; down = null;
+    if (opts.tip) opts.tip.hidden = true;            // the camera is about to move, so the hover tip would go stale
+    const o = pick(ev); if (!o) return select(null);
+    if (o.userData.kind === "theme") setOpen(o.userData.i, !themes[o.userData.i].open);
+    else select(selected === o.userData.name ? null : o.userData.name);
+  });
+  el.addEventListener("pointermove", ev => {
+    const o = pick(ev); el.style.cursor = o ? "pointer" : (mode === "flat" ? "default" : "grab");
+    if (hover && hover !== o) hover.material.emissive?.setHex(0); hover = o; if (o) o.material.emissive?.setHex(dark ? 0x444444 : 0x222222);
+    const hn = o && o.userData.kind === "node" ? o.userData.name : null;
+    if (hn !== hoverNode) { hoverNode = hn; rebuildEdges(); }
+    const tip = opts.tip; if (!tip) return;
+    if (!o) { tip.hidden = true; return; }
+    const d = o.userData, escH = s => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+    tip.innerHTML = d.kind === "theme"
+      ? `<b>${escH(g.groups[d.i].label)}</b><span>${g.groups[d.i].members.length} nodes · click to ${themes[d.i].open ? "close" : "open"}</span>`
+      : `<b>${escH(d.name)}</b><span>${escH(members[d.name].n.type)} · click for links</span>`;
+    tip.hidden = false;
+    const r = container.getBoundingClientRect();
+    tip.style.left = Math.max(4, Math.min(ev.clientX - r.left + 14, r.width - 290)) + "px"; tip.style.top = (ev.clientY - r.top + 16) + "px";
+  });
+  el.addEventListener("pointerleave", () => { if (opts.tip) opts.tip.hidden = true; if (hoverNode) { hoverNode = null; rebuildEdges(); } });
+
+  // ---- animation loop ----
+  const ro = new ResizeObserver(() => { camera.aspect = W() / H(); camera.updateProjectionMatrix(); renderer.setSize(W(), H());
+    if (mode === "flat" && !camTween) placeCamera(POSE.flat()); });
+  ro.observe(container);
+  let raf;
+  function frame(now) {
+    // camera glide (interpolated on the sphere so it swings rather than cuts)
+    if (camTween) {
+      const k = ease(clamp01((now - camTween.t0) / CAM_MS)), A = camTween.from, B = camTween.to;
+      const tgt = A.target.clone().lerp(B.target, k);
+      placeCamera({ target: tgt, r: A.r + (B.r - A.r) * k, phi: A.phi + (B.phi - A.phi) * k, theta: A.theta + (((B.theta - A.theta + Math.PI * 3) % (Math.PI * 2)) - Math.PI) * k });
+      if (k >= 1) { camTween = null; controls.enabled = true; }
+    }
+    let structural = false; const anyOpen = openList.length > 0;
+    themes.forEach(T => {
+      const dur = T.open ? OPEN_MS : CLOSE_MS, goal = T.open ? 1 : 0;
+      if (T.t !== goal) {
+        const p = clamp01((now - T.tStart) / dur); T.t = T.tFrom + (goal - T.tFrom) * p;
+        if (p >= 1) { T.t = goal; if (!T.open) structural = true; }
+      }
+      const t = T.t, layerK = ease(clamp01(t / 0.55)), dropK = clamp01((t - 0.2) / 0.8);
+      T.layer.visible = T.funnel.visible = t > 0;
+      T.layer.scale.setScalar(Math.max(0.001, easeOutBack(layerK) * 1));
+      T.disc.material.opacity = 0.13 * layerK; T.rim.material.opacity = 0.55 * layerK;
+      T.funnel.material.opacity = 0.06 * layerK; T.funnel.scale.set(1, Math.max(0.001, layerK), 1); T.funnel.position.y = -DEPTH * layerK / 2;
+      T.halo.material.opacity = layerK;
+      const dimGoal = anyOpen && !T.open && T.t === 0 ? 0.35 : 1; T.dim += (dimGoal - T.dim) * (REDUCED ? 1 : 0.12);
+      T.mesh.material.opacity = T.dim; T.lab.userData.dim = T.dim;
+      T.grp.members.forEach(nm => {
+        const m = members[nm]; if (!m) return;
+        const k = ease(dropK), vis = t > 0;
+        [m.mesh, m.lab, m.stem].forEach(o => { o.visible = vis; });
+        if (!vis) return;
+        m.mesh.position.lerpVectors(T.mesh.position, m.home, k);
+        m.mesh.material.opacity = clamp01(dropK * 3);
+        m.lab.position.copy(m.mesh.position);
+        m.lab.userData.base = clamp01((dropK - 0.6) / 0.4);
+        m.stem.geometry.setFromPoints([T.mesh.position, m.mesh.position]); m.stem.material.opacity = 0.35 * k;
+      });
+    });
+    if (structural) rebuildEdges(); else updateEdges();
+    layoutLabels();
+    controls.update(); renderer.render(scene, camera); raf = requestAnimationFrame(frame);
+  }
+  raf = requestAnimationFrame(frame);
+  rebuildEdges();
+
+  return {
+    expandAll() { themes.forEach((T, i) => { if (T.grp.members.length) setOpen(i, true); }); },
+    collapseAll() { themes.forEach((_, i) => setOpen(i, false)); },
+    toggle(i) { setOpen(i, !themes[i].open); },
+    mode: () => mode,
+    screenPos(kind, key) {           // page coordinates of a theme (index) or node (name), for tests
+      const o = kind === "theme" ? themes[key].mesh : members[key].mesh; const v = o.position.clone().project(camera);
+      const r = el.getBoundingClientRect(); return { x: r.left + (v.x + 1) / 2 * r.width, y: r.top + (1 - v.y) / 2 * r.height };
+    },
+    destroy() { cancelAnimationFrame(raf); ro.disconnect(); controls.dispose(); renderer.dispose(); container.innerHTML = ""; },
+  };
+}
+
+const T = { "Stimulus":"--t-stimulus","Emotion":"--t-emotion","Cognition":"--t-cognition","Behavior":"--t-behavior","Physiological Sensation":"--t-physio" };
+document.getElementById("legend").innerHTML = Object.entries(T).map(([t, v]) => `<span><span class="sw" style="background:var(${v})"></span>${t}</span>`).join("");
+const info = document.getElementById("info");
+const esc = s => String(s).replace(/[&<>]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;" })[c]);
+let view; const OPTS = {
+  preserve: true, tip: document.getElementById("tip"),
+  onChange: (n, t) => { document.getElementById("b-col").disabled = !n; document.getElementById("hint").textContent = n ? `${n} of ${t} themes open · click a theme again to close it · click a node for its links · drag to rotate` : "Click a theme to open the layer of detailed nodes beneath it"; },
+  onSelect: s => {
+    if (!s) { info.classList.add("hidden"); return; }
+    const li = (arr, dir) => arr.map(e => `<li>${dir} <b>${esc(dir === "→" ? e.to : e.from)}</b>${e.evidence ? `<div class="ev">${esc(e.evidence)}</div>` : ""}</li>`).join("");
+    info.innerHTML = `<h4>${esc(s.name)}</h4><div class="meta">${esc(s.type)} · theme: ${esc(s.theme || "–")}</div>
+      ${s.out.length + s.inn.length ? `<ul style="padding-left:16px;margin:0">${li(s.out, "→")}${li(s.inn, "←")}</ul>` : `<div class="ev">No links to other nodes in this network.</div>`}`;
+    info.classList.remove("hidden");
+  } };
+function boot() { view = render3D(document.getElementById("stage"), window.NET, OPTS); window.VIEW = view; OPTS.onChange(0, window.NET.groups.length); info.classList.add("hidden"); OPTS.tip.hidden = true; }
+boot();
+const rebootForTheme = () => { view.destroy(); boot(); };
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rebootForTheme);
+new MutationObserver(rebootForTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+document.getElementById("b-exp").onclick = () => view.expandAll();
+document.getElementById("b-col").onclick = () => view.collapseAll();
+</script>
+

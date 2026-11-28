@@ -1,0 +1,665 @@
+{
+ "case_id": "fc.p009-p290",
+ "kind": "formulation-contrast",
+ "patient_a": "p009",
+ "patient_b": "p290",
+ "names": {
+  "a": "Max",
+  "b": "Natasha"
+ },
+ "tags": {
+  "a": {
+   "patient_id": "p009",
+   "name": "Max",
+   "gender": "male",
+   "age_bucket": "Older adult (65+)",
+   "culture": "Unspecified",
+   "disorders": [
+    "Anxiety",
+    "Depression",
+    "OCD"
+   ],
+   "primary_disorder": "Anxiety"
+  },
+  "b": {
+   "patient_id": "p290",
+   "name": "Natasha",
+   "gender": "neutral",
+   "age_bucket": "Unknown",
+   "culture": "Unspecified",
+   "disorders": [
+    "Anxiety",
+    "Depression",
+    "PTSD / Trauma"
+   ],
+   "primary_disorder": "Anxiety"
+  }
+ },
+ "probe": "When you think about getting into a car or going out near traffic, what are you most afraid would happen?",
+ "note": "driving and travel avoidance",
+ "focus": "B0044",
+ "focus_name": "Driving and Travel Avoidance",
+ "source": "recorded 2026-11-26T16:31 through the live app (patient model, frozen F1 aligner); gap fc-gap-v2 | re-aligned with interview-align-v2, gap fc-gap-v3 | re-aligned with interview-align-v2, gap fc-gap-v3 | re-aligned with interview-align-v2, gap fc-gap-v4 | re-aligned with interview-align-v2, gap fc-gap-v5 | re-aligned with interview-align-v2, gap fc-gap-v6 | re-aligned with interview-align-v2, gap fc-gap-v6 | re-aligned with interview-align-v2, gap fc-gap-v6",
+ "turns": [
+  {
+   "question": "When you think about getting into a car or going out near traffic, what are you most afraid would happen?",
+   "a": {
+    "response": "I’m scared I’d cause an accident—like, somehow hit someone or run a red light without seeing it. I’ve been thinking about it so much lately, even when I’m inside. It’s like I can’t stop wondering if I’ll mess up.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n16",
+       "type": "Emotion",
+       "label": "Fear of accidental harm to loved ones",
+       "words": "I’m scared",
+       "kind": "said",
+       "confidence": 0.8
+      },
+      {
+       "node": "n29",
+       "type": "Cognition",
+       "label": "Fear of unintentionally causing harm through traffic-related accidents",
+       "words": "I’d cause an accident—like, somehow hit someone or run a red light without seeing it",
+       "kind": "said",
+       "confidence": 0.9
+      },
+      {
+       "node": "n24",
+       "type": "Cognition",
+       "label": "Replaying potential accident scenarios",
+       "words": "I’ve been thinking about it so much lately, even when I’m inside",
+       "kind": "said",
+       "confidence": 0.7
+      }
+     ],
+     "themes": []
+    }
+   },
+   "b": {
+    "response": "Just... I don’t even want to be around them. Not since it happened. The noise, the way things moved—like everything’s too fast.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n1",
+       "type": "Behavior",
+       "label": "Avoids cars and travel",
+       "words": "I don’t even want to be around them",
+       "kind": "said",
+       "confidence": 0.85
+      },
+      {
+       "node": "n49",
+       "type": "Stimulus",
+       "label": "Traffic exposure",
+       "words": "the way things moved—like everything’s too fast",
+       "kind": "implied",
+       "confidence": 0.6
+      }
+     ],
+     "themes": []
+    }
+   },
+   "fc": {
+    "version": "fc-gap-v6",
+    "d": 0.709,
+    "method": "nodes",
+    "checked": [],
+    "reading": "Max fears he will cause an accident and keeps imagining it (harm obsession); Natasha avoids traffic because its noise and speed trigger her trauma (cue-driven avoidance)",
+    "a": {
+     "gist": "scared of causing an accident",
+     "unaligned": false,
+     "quote": "I’m scared",
+     "main": "n16",
+     "items": [
+      {
+       "node": "n16",
+       "ntype": "Emotion",
+       "type": "Feeling",
+       "short": "Fear harming loved ones",
+       "words": "I’m scared",
+       "kind": "said"
+      },
+      {
+       "node": "n29",
+       "ntype": "Cognition",
+       "type": "Thought",
+       "short": "Fear causing traffic…",
+       "words": "I’d cause an accident—like, somehow hit someone or run a red light without seeing it",
+       "kind": "said"
+      },
+      {
+       "node": "n24",
+       "ntype": "Cognition",
+       "type": "Thought",
+       "short": "Replays accident scenes",
+       "words": "I’ve been thinking about it so much lately, even when I’m inside",
+       "kind": "said"
+      }
+     ],
+     "n_nodes": 3
+    },
+    "b": {
+     "gist": "traffic feels too fast",
+     "unaligned": false,
+     "quote": "the way things moved—like everything’s too fast",
+     "main": "n49",
+     "items": [
+      {
+       "node": "n1",
+       "ntype": "Behavior",
+       "type": "Behaviour",
+       "short": "Avoids cars/travel",
+       "words": "I don’t even want to be around them",
+       "kind": "said"
+      },
+      {
+       "node": "n49",
+       "ntype": "Stimulus",
+       "type": "Trigger",
+       "short": "Traffic exposure",
+       "words": "the way things moved—like everything’s too fast",
+       "kind": "implied"
+      }
+     ],
+     "n_nodes": 2
+    },
+    "both": [],
+    "g": 0.284
+   }
+  },
+  {
+   "question": "What do you do to keep that from happening?",
+   "a": {
+    "response": "I check the doors again and again, just to make sure they’re locked. And I listen for sirens, hoping maybe they’ll tell me everything’s okay.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n4",
+       "type": "Behavior",
+       "label": "Compulsive checking rituals for locks, windows, and appliances",
+       "words": "I check the doors again and again, just to make sure they’re locked",
+       "kind": "said",
+       "confidence": 0.9
+      },
+      {
+       "node": "n5",
+       "type": "Behavior",
+       "label": "Listening for sirens as reassurance",
+       "words": "I listen for sirens, hoping maybe they’ll tell me everything’s okay",
+       "kind": "said",
+       "confidence": 0.9
+      }
+     ],
+     "themes": []
+    }
+   },
+   "b": {
+    "response": "I try not to go anywhere. Just... stay inside. It’s easier.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n7",
+       "type": "Behavior",
+       "label": "Stays within home environment",
+       "words": "stay inside",
+       "kind": "said",
+       "confidence": 0.9
+      },
+      {
+       "node": "n1",
+       "type": "Behavior",
+       "label": "Avoids cars and travel",
+       "words": "I try not to go anywhere",
+       "kind": "implied",
+       "confidence": 0.7
+      }
+     ],
+     "themes": []
+    }
+   },
+   "fc": {
+    "version": "fc-gap-v6",
+    "d": 0.52,
+    "method": "nodes",
+    "checked": [
+     {
+      "a_node": "n5",
+      "b_node": "n1",
+      "type": "Behaviour",
+      "sim": 0.55,
+      "same": false,
+      "reason": "A seeks reassurance by monitoring threat cues; B avoids travel to prevent trauma cue exposure.",
+      "label": ""
+     }
+    ],
+    "reading": "Max repeatedly checks locks and listens for sirens (compulsive checking and reassurance-seeking); Natasha stays inside and avoids going anywhere (avoidance and restriction to a safe space)",
+    "a": {
+     "gist": "checks door locks repeatedly",
+     "unaligned": false,
+     "quote": "I check the doors again and again, just to make sure they’re locked",
+     "main": "n4",
+     "items": [
+      {
+       "node": "n4",
+       "ntype": "Behavior",
+       "type": "Behaviour",
+       "short": "Checking rituals",
+       "words": "I check the doors again and again, just to make sure they’re locked",
+       "kind": "said"
+      },
+      {
+       "node": "n5",
+       "ntype": "Behavior",
+       "type": "Behaviour",
+       "short": "Listens for sirens",
+       "words": "I listen for sirens, hoping maybe they’ll tell me everything’s okay",
+       "kind": "said"
+      }
+     ],
+     "n_nodes": 2
+    },
+    "b": {
+     "gist": "stays inside to feel safe",
+     "unaligned": false,
+     "quote": "stay inside",
+     "main": "n7",
+     "items": [
+      {
+       "node": "n7",
+       "ntype": "Behavior",
+       "type": "Behaviour",
+       "short": "Stays at home",
+       "words": "stay inside",
+       "kind": "said"
+      },
+      {
+       "node": "n1",
+       "ntype": "Behavior",
+       "type": "Behaviour",
+       "short": "Avoids cars/travel",
+       "words": "I try not to go anywhere",
+       "kind": "implied"
+      }
+     ],
+     "n_nodes": 2
+    },
+    "both": [],
+    "g": 0.378
+   }
+  },
+  {
+   "question": "How long has this been going on for you?",
+   "a": {
+    "response": "It started around the time I turned 35, back when I was still working outside.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [],
+     "themes": []
+    }
+   },
+   "b": {
+    "response": "Since the accident.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n51",
+       "type": "Stimulus",
+       "label": "Accident-related thoughts",
+       "words": "Since the accident",
+       "kind": "implied",
+       "confidence": 0.6
+      }
+     ],
+     "themes": []
+    }
+   },
+   "fc": {
+    "version": "fc-gap-v6",
+    "d": 0.993,
+    "method": "text",
+    "checked": [],
+    "reading": "Max dates it plainly to age 35 and outdoor work (factual timeline, no distress cue); Natasha anchors everything to the accident (intrusive accident-related thoughts)",
+    "a": {
+     "gist": "started around age 35",
+     "unaligned": true,
+     "quote": "It started around the time I turned 35, back when I was still working outside.",
+     "main": null,
+     "items": [],
+     "n_nodes": 0
+    },
+    "b": {
+     "gist": "began after the accident",
+     "unaligned": false,
+     "quote": "Since the accident",
+     "main": "n51",
+     "items": [
+      {
+       "node": "n51",
+       "ntype": "Stimulus",
+       "type": "Trigger",
+       "short": "Accident thoughts",
+       "words": "Since the accident",
+       "kind": "implied"
+      }
+     ],
+     "n_nodes": 1
+    },
+    "both": [],
+    "g": 0.624
+   }
+  },
+  {
+   "question": "What would happen if you went anyway?",
+   "a": {
+    "response": "I’d probably end up somewhere else, but I wouldn’t go far. Just a bit further down the road. Then I’d sit there for hours, thinking about what might have gone wrong.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n10",
+       "type": "Behavior",
+       "label": "Ruminating post-outings",
+       "words": "sit there for hours, thinking about what might have gone wrong",
+       "kind": "said",
+       "confidence": 0.85
+      }
+     ],
+     "themes": []
+    }
+   },
+   "b": {
+    "response": "It’d probably start shaking. Like my hands, my chest—it gets tight.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n24",
+       "type": "Physiological Sensation",
+       "label": "chest pain during panic attacks",
+       "words": "my chest—it gets tight",
+       "kind": "implied",
+       "confidence": 0.6
+      }
+     ],
+     "themes": []
+    }
+   },
+   "fc": {
+    "version": "fc-gap-v6",
+    "d": 1.0,
+    "method": "nodes",
+    "checked": [],
+    "reading": "Max pictures going only a little way, then spending hours reviewing what might have gone wrong (post-event rumination); Natasha expects shaking and chest tightness (bodily panic sensations)",
+    "a": {
+     "gist": "sits for hours replaying mistakes",
+     "unaligned": false,
+     "quote": "sit there for hours, thinking about what might have gone wrong",
+     "main": "n10",
+     "items": [
+      {
+       "node": "n10",
+       "ntype": "Behavior",
+       "type": "Behaviour",
+       "short": "Post-outing rumination",
+       "words": "sit there for hours, thinking about what might have gone wrong",
+       "kind": "said"
+      }
+     ],
+     "n_nodes": 1
+    },
+    "b": {
+     "gist": "chest gets tight",
+     "unaligned": false,
+     "quote": "my chest—it gets tight",
+     "main": "n24",
+     "items": [
+      {
+       "node": "n24",
+       "ntype": "Physiological Sensation",
+       "type": "Body",
+       "short": "Chest pain (panic)",
+       "words": "my chest—it gets tight",
+       "kind": "implied"
+      }
+     ],
+     "n_nodes": 1
+    },
+    "both": [],
+    "g": 0.774
+   }
+  },
+  {
+   "question": "What do you notice in your body when you are close to a busy road?",
+   "a": {
+    "response": "My hands shake a little. My chest tightens, like I can’t breathe. I feel sick, almost like I’m gonna pass out. It’s really hard to stand there.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [],
+     "themes": []
+    }
+   },
+   "b": {
+    "response": "My heart feels like it’s pounding. And my legs... they’re shaky. I can’t stand the sound either.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n26",
+       "type": "Physiological Sensation",
+       "label": "palpitations",
+       "words": "My heart feels like it’s pounding",
+       "kind": "said",
+       "confidence": 0.9
+      },
+      {
+       "node": "n46",
+       "type": "Stimulus",
+       "label": "Loud noises",
+       "words": "I can’t stand the sound either",
+       "kind": "implied",
+       "confidence": 0.6
+      }
+     ],
+     "themes": []
+    }
+   },
+   "fc": {
+    "version": "fc-gap-v6",
+    "d": 0.305,
+    "method": "text",
+    "checked": [],
+    "reading": "Max describes shaking, chest tightness and near-fainting (panic-like bodily alarm); Natasha notes a pounding heart and is set off by traffic noise (trauma-cue startle)",
+    "a": {
+     "gist": "hands shake, chest tightens, sick",
+     "unaligned": true,
+     "quote": "My hands shake a little. My chest tightens, like I can’t breathe. I feel sick, almost like I’m gonna pass out. It’s really hard to stand there.",
+     "main": null,
+     "items": [],
+     "n_nodes": 0
+    },
+    "b": {
+     "gist": "heart pounds near roads",
+     "unaligned": false,
+     "quote": "My heart feels like it’s pounding",
+     "main": "n26",
+     "items": [
+      {
+       "node": "n26",
+       "ntype": "Physiological Sensation",
+       "type": "Body",
+       "short": "Palpitations",
+       "words": "My heart feels like it’s pounding",
+       "kind": "said"
+      },
+      {
+       "node": "n46",
+       "ntype": "Stimulus",
+       "type": "Trigger",
+       "short": "Loud noises",
+       "words": "I can’t stand the sound either",
+       "kind": "implied"
+      }
+     ],
+     "n_nodes": 2
+    },
+    "both": [],
+    "g": 0.587
+   }
+  },
+  {
+   "question": "What goes through your mind afterwards, once you are home?",
+   "a": {
+    "response": "I replay every decision I made, trying to figure out where I messed up. I wonder if I left the door unlocked, or if I missed a sign.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n10",
+       "type": "Behavior",
+       "label": "Ruminating post-outings",
+       "words": "I replay every decision I made, trying to figure out where I messed up",
+       "kind": "said",
+       "confidence": 0.9
+      }
+     ],
+     "themes": []
+    }
+   },
+   "b": {
+    "response": "I keep thinking about it. About how quick it all was.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n51",
+       "type": "Stimulus",
+       "label": "Accident-related thoughts",
+       "words": "I keep thinking about it. About how quick it all was.",
+       "kind": "said",
+       "confidence": 0.8
+      }
+     ],
+     "themes": []
+    }
+   },
+   "fc": {
+    "version": "fc-gap-v6",
+    "d": 0.865,
+    "method": "nodes",
+    "checked": [],
+    "reading": "Max replays his choices hunting for mistakes (self-blaming rumination); Natasha keeps returning to how fast it happened (intrusive accident memories)",
+    "a": {
+     "gist": "replay every decision I made",
+     "unaligned": false,
+     "quote": "I replay every decision I made, trying to figure out where I messed up",
+     "main": "n10",
+     "items": [
+      {
+       "node": "n10",
+       "ntype": "Behavior",
+       "type": "Behaviour",
+       "short": "Post-outing rumination",
+       "words": "I replay every decision I made, trying to figure out where I messed up",
+       "kind": "said"
+      }
+     ],
+     "n_nodes": 1
+    },
+    "b": {
+     "gist": "keep thinking how quick it was",
+     "unaligned": false,
+     "quote": "I keep thinking about it. About how quick it all was.",
+     "main": "n51",
+     "items": [
+      {
+       "node": "n51",
+       "ntype": "Stimulus",
+       "type": "Trigger",
+       "short": "Accident thoughts",
+       "words": "I keep thinking about it. About how quick it all was.",
+       "kind": "said"
+      }
+     ],
+     "n_nodes": 1
+    },
+    "both": [],
+    "g": 0.698
+   }
+  }
+ ],
+ "reveal": {
+  "concept_id": "B0044",
+  "name": "Driving and Travel Avoidance",
+  "a": [
+   {
+    "node": "n12",
+    "label": "Dread about potential harm",
+    "short": "Dread of harm",
+    "type": "Feeling",
+    "ntype": "Emotion",
+    "hint": "ask how he feels when imagining something going wrong outside"
+   },
+   {
+    "node": "n29",
+    "label": "Fear of unintentionally causing harm through traffic-related accidents",
+    "short": "Fear causing traffic…",
+    "type": "Thought",
+    "ntype": "Cognition",
+    "hint": "ask what he worries he might accidentally do to others near roads"
+   },
+   {
+    "node": "n18",
+    "label": "Outdoor spaces are inherently dangerous",
+    "short": "Outside is dangerous",
+    "type": "Thought",
+    "ntype": "Cognition",
+    "hint": "ask what he believes about how safe outdoor places are"
+   }
+  ],
+  "b": [
+   {
+    "node": "n16",
+    "label": "Fear",
+    "short": "Fear",
+    "type": "Feeling",
+    "ntype": "Emotion",
+    "hint": "ask what emotion they notice as they prepare to go out"
+   },
+   {
+    "node": "n36",
+    "label": "What if I have another panic attack?",
+    "short": "Fear of next panic",
+    "type": "Thought",
+    "ntype": "Cognition",
+    "hint": "ask what they worry might happen to their body while out"
+   },
+   {
+    "node": "n48",
+    "label": "Car travel",
+    "short": "Car travel",
+    "type": "Trigger",
+    "ntype": "Stimulus",
+    "hint": "ask which ways of getting around make it hardest for them"
+   }
+  ]
+ },
+ "learning_by_n": {
+  "3": {
+   "point": "In this round, the history question ('how long has this been going on') opened the widest gap between Max and Natasha; asking what they do to prevent the feared outcome landed mid-range, while asking what they most fear would happen kept their answers closest.",
+   "model": "claude-opus-5-5"
+  },
+  "5": {
+   "point": "Asking what would happen if they faced the feared situation anyway opened the widest gap, with history and bodily-sensation questions mid-range. Questions about the feared outcome itself and what they do to prevent it kept Max's and Natasha's answers closest.",
+   "model": "claude-opus-5-5"
+  },
+  "6": {
+   "point": "The widest gaps came from 'what would happen if you went anyway' and 'what goes through your mind afterwards'. 'How long' and bodily-sensation questions sat mid-range. 'What are you most afraid of' and 'what do you do to prevent it' kept Max's and Natasha's answers closest.",
+   "model": "claude-opus-5-5"
+  }
+ }
+}

@@ -1,0 +1,816 @@
+{
+ "patient_id": "p001",
+ "index": 1,
+ "name": "Emily",
+ "kind": "recorded interview",
+ "recorded": "2026-11-26T00:55",
+ "source": "scripted trainee questions (scripts/interview_scripts.json); patient replies from the deployed patient model; alignment by the frozen F1 aligner; explanations AI-generated (patienttrace/interview.py)",
+ "turns": [
+  {
+   "who": "t",
+   "text": "Hi Emily, thanks for coming in. What brings you here today?"
+  },
+  {
+   "who": "p",
+   "text": "I’ve been having trouble sleeping lately—my mind keeps going over the same things, like whether I’m doing everything right. And there’s this feeling in my chest sometimes, like my heart’s trying to tell me something. I didn’t think it was serious, but now I’m worried it might be.",
+   "active": [
+    "n18"
+   ],
+   "kinds": {
+    "n18": "said"
+   },
+   "confidence": {
+    "n18": 0.8
+   },
+   "spans": [
+    {
+     "start": 0,
+     "end": 40,
+     "text": "I’ve been having trouble sleeping lately",
+     "node": "n18"
+    }
+   ],
+   "themes": [],
+   "path": [],
+   "trigger": null,
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "Opening with sleep troubles",
+    "surface": "Emily leads with poor sleep and a mind that keeps replaying whether she's doing things right, then mentions a worrying chest feeling, almost tentatively.",
+    "under": "The clearest thread here is her disrupted sleep. She names it outright as the main problem bringing her in. Nothing else she said linked to her mapped patterns yet, so the sleep difficulty stands on its own for now.",
+    "tip": "She opened up quickly but hedged on the chest feeling. Stay curious about the sleep first, where she seems most comfortable, without pushing into health fears too fast. A guarded client needs to feel heard before going deeper.",
+    "instead": "That sounds exhausting, can you tell me what a typical night looks like when the sleep isn't going well?",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n18",
+      "kind": "said",
+      "confidence": 0.8,
+      "span": {
+       "start": 0,
+       "end": 40,
+       "text": "I’ve been having trouble sleeping lately"
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": null,
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n10",
+    "n16",
+    "n18"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "That sounds unsettling. What happens in your body when one of those episodes starts?"
+  },
+  {
+   "who": "p",
+   "text": "It’s like my heart kicks in too hard, and I get this tightness in my chest. I can’t really breathe properly, and my hands go cold.",
+   "active": [
+    "n16",
+    "n17"
+   ],
+   "kinds": {
+    "n16": "said",
+    "n17": "said"
+   },
+   "confidence": {
+    "n16": 0.85,
+    "n17": 0.85
+   },
+   "spans": [
+    {
+     "start": 10,
+     "end": 36,
+     "text": "my heart kicks in too hard",
+     "node": "n16"
+    },
+    {
+     "start": 42,
+     "end": 129,
+     "text": "I get this tightness in my chest. I can’t really breathe properly, and my hands go cold",
+     "node": "n17"
+    }
+   ],
+   "themes": [],
+   "path": [
+    [
+     "n16",
+     "n17"
+    ]
+   ],
+   "trigger": null,
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "Inside the episode",
+    "surface": "Emily describes a pounding heart, chest tightness, trouble breathing and cold hands. She answers plainly and in concrete physical terms.",
+    "under": "The racing heart comes first and seems to set off the wider panic-like feelings: tight chest, short breath, cold hands. For someone with a heart condition, that first jolt likely carries extra alarm.",
+    "tip": "She's sharing body detail, which is a safe entry point for her. Stay with the sensations before asking about fears or meaning. Reflect them back accurately so she feels taken seriously, not judged.",
+    "instead": "So it starts with your heart kicking in hard, and then your chest tightens and your breathing and hands follow. What goes through your mind in that first moment?",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n16",
+      "kind": "said",
+      "confidence": 0.85,
+      "span": {
+       "start": 10,
+       "end": 36,
+       "text": "my heart kicks in too hard"
+      }
+     },
+     {
+      "node": "n17",
+      "kind": "said",
+      "confidence": 0.85,
+      "span": {
+       "start": 42,
+       "end": 129,
+       "text": "I get this tightness in my chest. I can’t really breathe properly, and my hands go cold"
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": null,
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n16",
+    "n17"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "And what goes through your mind in those moments?"
+  },
+  {
+   "who": "p",
+   "text": "My brain races—I start wondering if I’m having a heart attack or if I’ll never feel normal again. I try to Google every symptom, but it just makes me more anxious.",
+   "active": [
+    "n22",
+    "n26",
+    "n5",
+    "n10"
+   ],
+   "kinds": {
+    "n22": "said",
+    "n26": "said",
+    "n5": "said",
+    "n10": "said"
+   },
+   "confidence": {
+    "n22": 0.85,
+    "n26": 0.7,
+    "n5": 0.95,
+    "n10": 0.5
+   },
+   "spans": [
+    {
+     "start": 15,
+     "end": 61,
+     "text": "I start wondering if I’m having a heart attack",
+     "node": "n22"
+    },
+    {
+     "start": 65,
+     "end": 96,
+     "text": "if I’ll never feel normal again",
+     "node": "n26"
+    },
+    {
+     "start": 98,
+     "end": 127,
+     "text": "I try to Google every symptom",
+     "node": "n5"
+    },
+    {
+     "start": 133,
+     "end": 162,
+     "text": "it just makes me more anxious",
+     "node": "n10"
+    }
+   ],
+   "themes": [],
+   "path": [
+    [
+     "n5",
+     "n10"
+    ],
+    [
+     "n5",
+     "n22"
+    ],
+    [
+     "n10",
+     "n5"
+    ],
+    [
+     "n22",
+     "n5"
+    ],
+    [
+     "n26",
+     "n5"
+    ]
+   ],
+   "trigger": null,
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "The Googling loop",
+    "surface": "Emily describes racing thoughts about a heart attack and never feeling normal, then searching every symptom online, which leaves her more anxious.",
+    "under": "Fearing her heart is failing, and wondering if she'll ever be normal, push her to search online for reassurance. The searching feeds the frightening thoughts and the anxiety, which drive more searching: a self-sustaining loop.",
+    "tip": "She's named the loop herself. Reflect it back gently without judging the Googling. She fears being seen as overreacting about her health, so validate how understandable the search for reassurance is given her history.",
+    "instead": "It sounds like Googling is a way of trying to get some relief, but it ends up pulling you deeper into the worry. Is that how it feels?",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n22",
+      "kind": "said",
+      "confidence": 0.85,
+      "span": {
+       "start": 15,
+       "end": 61,
+       "text": "I start wondering if I’m having a heart attack"
+      }
+     },
+     {
+      "node": "n26",
+      "kind": "said",
+      "confidence": 0.7,
+      "span": {
+       "start": 65,
+       "end": 96,
+       "text": "if I’ll never feel normal again"
+      }
+     },
+     {
+      "node": "n5",
+      "kind": "said",
+      "confidence": 0.95,
+      "span": {
+       "start": 98,
+       "end": 127,
+       "text": "I try to Google every symptom"
+      }
+     },
+     {
+      "node": "n10",
+      "kind": "said",
+      "confidence": 0.5,
+      "span": {
+       "start": 133,
+       "end": 162,
+       "text": "it just makes me more anxious"
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": null,
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n5",
+    "n10",
+    "n16",
+    "n22",
+    "n26"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "What do you usually do afterwards, once it has settled a bit?"
+  },
+  {
+   "who": "p",
+   "text": "I lie awake, scrolling through articles about heart health, hoping to find answers. But nothing seems to calm me.",
+   "active": [
+    "n5",
+    "n18"
+   ],
+   "kinds": {
+    "n5": "said",
+    "n18": "said"
+   },
+   "confidence": {
+    "n5": 0.9,
+    "n18": 0.7
+   },
+   "spans": [
+    {
+     "start": 0,
+     "end": 11,
+     "text": "I lie awake",
+     "node": "n18"
+    },
+    {
+     "start": 13,
+     "end": 82,
+     "text": "scrolling through articles about heart health, hoping to find answers",
+     "node": "n5"
+    }
+   ],
+   "themes": [],
+   "path": [
+    [
+     "n5",
+     "n18"
+    ]
+   ],
+   "trigger": null,
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "Searching instead of sleeping",
+    "surface": "Emily describes lying awake reading about heart health online, looking for answers, and admits it never actually calms her.",
+    "under": "Her searching for reassurance online feeds the sleeplessness: the more she reads about her heart at night, the more her mind races and the harder it is to sleep. The search meant to soothe keeps her awake.",
+    "tip": "She has just named that the searching doesn't work. Gently reflect that honesty without judging the habit; she fears being judged about her health worries, so curiosity matters more than advice here.",
+    "instead": "It sounds like you're really hoping one of those articles will finally settle things, and it's exhausting when none of them do. What are you hoping to find when you start searching?",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n5",
+      "kind": "said",
+      "confidence": 0.9,
+      "span": {
+       "start": 13,
+       "end": 82,
+       "text": "scrolling through articles about heart health, hoping to find answers"
+      }
+     },
+     {
+      "node": "n18",
+      "kind": "said",
+      "confidence": 0.7,
+      "span": {
+       "start": 0,
+       "end": 11,
+       "text": "I lie awake"
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": null,
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n5",
+    "n10",
+    "n18"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "You mentioned hospitals. Have you had surgeries before?"
+  },
+  {
+   "who": "p",
+   "text": "They did a couple back when I was younger.",
+   "active": [
+    "n33"
+   ],
+   "kinds": {
+    "n33": "said"
+   },
+   "confidence": {
+    "n33": 0.8
+   },
+   "spans": [
+    {
+     "start": 0,
+     "end": 42,
+     "text": "They did a couple back when I was younger.",
+     "node": "n33"
+    }
+   ],
+   "themes": [],
+   "path": [],
+   "trigger": {
+    "phrase": "Have you had surgeries before?",
+    "node": "n31",
+    "source": "aligner"
+   },
+   "trigger_link": {
+    "from": "n31",
+    "to": "n33",
+    "dotted": true
+   },
+   "eased": [],
+   "guidance": {
+    "title": "A door left barely open",
+    "surface": "Emily confirms childhood surgeries in one short, flat sentence, with no detail, feelings or follow-up offered.",
+    "under": "Being asked about surgery touches her early hospital experiences. She names them but keeps them at arm's length: 'they did' it to her, 'back when', distancing language that suggests this memory still carries weight she isn't ready to open.",
+    "tip": "Don't push for details yet. Her brevity is protection, not a lack of material. Acknowledge what she shared, give her control over how much to say, and let trust build before going deeper.",
+    "instead": "That sounds like a lot to go through as a kid, and we can talk about it as much or as little as feels okay to you.",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n33",
+      "kind": "said",
+      "confidence": 0.8,
+      "span": {
+       "start": 0,
+       "end": 42,
+       "text": "They did a couple back when I was younger."
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": {
+     "phrase": "Have you had surgeries before?",
+     "node": "n31",
+     "source": "aligner"
+    },
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n33"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "How has your sleep been with all of this?"
+  },
+  {
+   "who": "p",
+   "text": "I haven’t slept well since the last appointment. I toss and turn because I’m thinking about everything—the test results, what could happen next, even the sound of machines in the ER. It’s like my brain won’t shut off.",
+   "active": [
+    "n18",
+    "n10",
+    "n29",
+    "n31",
+    "n32"
+   ],
+   "kinds": {
+    "n18": "said",
+    "n10": "implied",
+    "n29": "implied",
+    "n31": "said",
+    "n32": "said"
+   },
+   "confidence": {
+    "n18": 0.95,
+    "n10": 0.7,
+    "n29": 0.6,
+    "n31": 0.55,
+    "n32": 0.6
+   },
+   "spans": [
+    {
+     "start": 0,
+     "end": 64,
+     "text": "I haven’t slept well since the last appointment. I toss and turn",
+     "node": "n18"
+    },
+    {
+     "start": 103,
+     "end": 119,
+     "text": "the test results",
+     "node": "n31"
+    },
+    {
+     "start": 121,
+     "end": 143,
+     "text": "what could happen next",
+     "node": "n10"
+    },
+    {
+     "start": 150,
+     "end": 181,
+     "text": "the sound of machines in the ER",
+     "node": "n32"
+    }
+   ],
+   "themes": [],
+   "path": [
+    [
+     "n10",
+     "n18"
+    ],
+    [
+     "n29",
+     "n10"
+    ],
+    [
+     "n31",
+     "n18"
+    ]
+   ],
+   "trigger": null,
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "The mind that won't switch off",
+    "surface": "Emily describes tossing and turning since her last appointment, her thoughts racing over test results, what might come next, and the sounds of ER machines.",
+    "under": "Her last appointment likely set off worry about what's coming, and that worry keeps her awake. Thinking about the test results feeds the sleeplessness directly. The hospital sounds suggest those settings stay with her at night.",
+    "tip": "She has offered something vivid and personal, the ER machine sounds. Before moving on, reflect the exhaustion and the replaying so she feels heard rather than assessed.",
+    "instead": "It sounds exhausting to lie there with the test results and even those machine sounds running through your head. What is it like for you when that starts at night?",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n18",
+      "kind": "said",
+      "confidence": 0.95,
+      "span": {
+       "start": 0,
+       "end": 64,
+       "text": "I haven’t slept well since the last appointment. I toss and turn"
+      }
+     },
+     {
+      "node": "n10",
+      "kind": "implied",
+      "confidence": 0.7,
+      "span": {
+       "start": 121,
+       "end": 143,
+       "text": "what could happen next"
+      }
+     },
+     {
+      "node": "n29",
+      "kind": "implied",
+      "confidence": 0.6
+     },
+     {
+      "node": "n31",
+      "kind": "said",
+      "confidence": 0.55,
+      "span": {
+       "start": 103,
+       "end": 119,
+       "text": "the test results"
+      }
+     },
+     {
+      "node": "n32",
+      "kind": "said",
+      "confidence": 0.6,
+      "span": {
+       "start": 150,
+       "end": 181,
+       "text": "the sound of machines in the ER"
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": null,
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n10",
+    "n18",
+    "n29",
+    "n31"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "Does anyone in your life know how hard this has been?"
+  },
+  {
+   "who": "p",
+   "text": "My partner knows some stuff, but we don’t talk much about it.",
+   "active": [],
+   "kinds": {},
+   "confidence": {},
+   "spans": [],
+   "themes": [],
+   "path": [],
+   "trigger": null,
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "A partner kept at arm's length",
+    "surface": "Emily says her partner knows a bit, but she keeps it brief and adds that they don't really talk about it.",
+    "under": "This reply didn't map onto her network. On its own terms, it hints at guardedness even at home: she shares just enough, then holds back, perhaps to avoid seeming like a burden or being judged.",
+    "tip": "She has offered a small opening about her relationship. Stay curious, not corrective. Don't push her to open up more to her partner; just explore what the 'not talking' is like for her.",
+    "instead": "What's it like for you that your partner knows some of it, but it doesn't really get talked about?",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [],
+    "themes": [],
+    "trigger": null,
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "suggested": {
+    "active": [
+     "n6"
+    ],
+    "kinds": {
+     "n6": "implied"
+    },
+    "confidence": {
+     "n6": 0.5
+    },
+    "spans": [
+     {
+      "start": 33,
+      "end": 60,
+      "text": "we don’t talk much about it",
+      "node": "n6"
+     }
+    ],
+    "themes": [],
+    "path": [],
+    "trigger": null,
+    "trigger_link": null,
+    "eased": [],
+    "guidance": {
+     "title": "Keeping it at arm's length",
+     "surface": "Emily says her partner knows a little, but they rarely talk about it. The answer is brief and factual, with no feelings attached.",
+     "under": "This likely reflects her habit of pulling back from conversations about her health. Even with someone close, she seems to keep these talks small, perhaps to avoid feeling exposed or judged.",
+     "tip": "Don't push for more about the partner yet. Gently get curious about the 'not talking much' without implying it's a problem. She needs to feel her way of coping is respected before she can look at it.",
+     "instead": "It sounds like your partner knows a bit, but it's not something the two of you go into much, and I'm curious what that's like for you.",
+     "model": "claude-opus-5-5",
+     "version": "interview-guidance-v2"
+    },
+    "alignment": {
+     "version": "interview-align-v1",
+     "level": "low",
+     "nodes": [
+      {
+       "node": "n6",
+       "kind": "implied",
+       "confidence": 0.5,
+       "span": {
+        "start": 33,
+        "end": 60,
+        "text": "we don’t talk much about it"
+       }
+      }
+     ],
+     "themes": [],
+     "trigger": null,
+     "eased": [],
+     "model": "claude-opus-5-5"
+    }
+   },
+   "f1_active": []
+  },
+  {
+   "who": "t",
+   "text": "I don't think you're overreacting. Given everything your heart has been through, it makes sense to be scared."
+  },
+  {
+   "who": "p",
+   "text": "Thanks.",
+   "active": [],
+   "kinds": {},
+   "confidence": {},
+   "spans": [],
+   "themes": [],
+   "path": [],
+   "trigger": {
+    "phrase": "Given everything your heart has been through",
+    "node": "n34",
+    "source": "aligner"
+   },
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "A guarded thank-you",
+    "surface": "Emily accepts the validation with a single word. She doesn't push back, but she doesn't open up or add anything either.",
+    "under": "This reply didn't map onto her network. On its own terms, a short 'Thanks' fits her guardedness: she may welcome being told she isn't overreacting while still keeping the feeling at arm's length.",
+    "tip": "Validation may have landed, but don't rush to deepen it. Leave a little space and offer a gentle, optional way in, so she can choose how much to share without feeling pressed.",
+    "instead": "I'm glad that made sense, and we can go at whatever pace feels okay to you.",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [],
+    "themes": [],
+    "trigger": {
+     "phrase": "Given everything your heart has been through",
+     "node": "n34",
+     "source": "aligner"
+    },
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "suggested": {
+    "active": [],
+    "kinds": {},
+    "confidence": {},
+    "spans": [],
+    "themes": [
+     {
+      "theme": "t4",
+      "label": "Emotional Suppression",
+      "members": [
+       "n11",
+       "n12",
+       "n13",
+       "n14"
+      ],
+      "confidence": 0.4,
+      "span": {
+       "start": 0,
+       "end": 7,
+       "text": "Thanks."
+      }
+     }
+    ],
+    "path": [],
+    "trigger": {
+     "phrase": "Given everything your heart has been through",
+     "node": "n34",
+     "source": "aligner"
+    },
+    "trigger_link": null,
+    "eased": [],
+    "guidance": {
+     "title": "A guarded thank-you",
+     "surface": "Emily accepts the validation with a single word, polite but brief, offering nothing more about her fear.",
+     "under": "Only a loose theme matched: she is likely holding her feelings back. The warmth may have landed, but she keeps the emotion contained rather than opening up about it.",
+     "tip": "Short replies after validation are common for guarded patients. Don't push for more or repeat the reassurance. Let a little silence sit, then offer a gentle, low-pressure opening she can take or leave.",
+     "instead": "You don't have to say more than you want to, but I'm curious what it's like to hear someone say that.",
+     "model": "claude-opus-5-5",
+     "version": "interview-guidance-v2"
+    },
+    "alignment": {
+     "version": "interview-align-v1",
+     "level": "low",
+     "nodes": [],
+     "themes": [
+      {
+       "theme": "t4",
+       "label": "Emotional Suppression",
+       "members": [
+        "n11",
+        "n12",
+        "n13",
+        "n14"
+       ],
+       "confidence": 0.4,
+       "span": {
+        "start": 0,
+        "end": 7,
+        "text": "Thanks."
+       }
+      }
+     ],
+     "trigger": {
+      "phrase": "Given everything your heart has been through",
+      "node": "n34",
+      "source": "aligner"
+     },
+     "eased": [],
+     "model": "claude-opus-5-5"
+    }
+   },
+   "f1_active": []
+  }
+ ],
+ "aligner": "interview-align-v1",
+ "reenriched": "interview-align-v1 + guidance-v2 from the alignment; replies unchanged"
+}

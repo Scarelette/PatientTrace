@@ -1,0 +1,29 @@
+{
+ "turns": [
+  {
+   "turn": 1,
+   "first_text_s": 0.17,
+   "reply_s": 1.23,
+   "reply_plus_analysis_s": 1.24,
+   "analysis_ok": true
+  },
+  {
+   "turn": 2,
+   "first_text_s": 0.19,
+   "reply_s": 0.61,
+   "reply_plus_analysis_s": 6.03,
+   "analysis_ok": true
+  },
+  {
+   "turn": 3,
+   "first_text_s": 0.09,
+   "reply_s": 0.54,
+   "reply_plus_analysis_s": 5.14,
+   "analysis_ok": true
+  }
+ ],
+ "sbatch_to_starting_badge_s": 12.1,
+ "sbatch_to_ready_s": 58.3,
+ "autostart_open_to_answer_s": 50.3,
+ "autostart_question_to_answer_s": 46.5
+}

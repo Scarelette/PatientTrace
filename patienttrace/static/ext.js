@@ -648,7 +648,7 @@ const Ext = (function () {
 
   // ======================================================================= page hooks
   let prewarmed = false;    // the patient model is requested as soon as the demo opens (queue + load overlap browsing)
-  const STEP_OF = { choose: "profile", create: "profile", existing: "profile", generate: "network", chat: "interview", contrast: "compare", dual: "compare" };
+  const STEP_OF = { choose: "profile", create: "profile", existing: "profile", generate: "network", chat: "interview", interview: "interview", fc: "compare", contrast: "compare", dual: "compare" };
   const STEP_ORDER = ["profile", "network", "interview", "compare"];
   function fillDisclaimers() {
     const d = ext() ? ext().disclaimer : "";
@@ -671,11 +671,12 @@ const Ext = (function () {
       const link = i !== ci && stepHasState(s.dataset.step);
       s.classList.toggle("link", link); s.setAttribute("role", link ? "link" : "text"); s.tabIndex = link ? 0 : -1;
       if (i === ci) s.setAttribute("aria-current", "step"); else s.removeAttribute("aria-current"); });
-    const wide = name === "contrast" || name === "dual" || (name === "chat" && $("#chat-split").classList.contains("on"));
+    const wide = name === "contrast" || name === "dual" || name === "interview" || name === "fc" || (name === "chat" && $("#chat-split").classList.contains("on"));
     document.body.classList.toggle("ext-wide", wide);
     // Interview and Compare are one-viewport app layouts (CSS: body.app-chat / body.app-dual)
     document.body.classList.toggle("app-chat", name === "chat" && $("#chat-split").classList.contains("on"));
     document.body.classList.toggle("app-dual", name === "dual");
+    if (name !== "interview") document.documentElement.classList.remove("iv-lock");
     if (name === "generate") { $("#net-label").classList.remove("hidden"); }
     if (!prewarmed && (flags().align || flags().dual)) { prewarmed = true; api("/api/gpu/ensure", {}).catch(() => {}); }
     try { $("#g-tip").classList.remove("show"); } catch (e) {}
@@ -685,14 +686,14 @@ const Ext = (function () {
     if (k === "profile") return true;
     if (k === "network") return !!(State.graphs && (State.graphs.long || State.graphs.short));
     if (k === "interview") return !!State.chat || !!(State.profile && State.patientId);
-    if (k === "compare") return !!D || !!R;
+    if (k === "compare") return !!D || !!R || (window.FC && FC.has()) || canContrast();
     return false;
   }
   function goStep(k) {
     if (k === "profile") App.restart();
     else if (k === "network" && stepHasState("network")) show("generate");
-    else if (k === "interview") { if (State.chat) show("chat"); else if (State.profile) App.goChat(); }
-    else if (k === "compare") { if (D) { show("dual"); fitDual(); } else if (R) show("contrast"); }
+    else if (k === "interview") { if (window.Interview && State.patientId) Interview.open(); else if (State.chat) show("chat"); else if (State.profile) App.goChat(); }
+    else if (k === "compare") { if (canContrast()) pickContrast(); else if (window.FC && FC.has()) show("fc"); else if (D) { show("dual"); fitDual(); } else if (R) show("contrast"); }
   }
   function curTheme() {
     const t = document.documentElement.getAttribute("data-theme");
@@ -764,6 +765,8 @@ const Ext = (function () {
     if (!ext()) return;
     fillDisclaimers();
     $("#contrast-btn").classList.toggle("hidden", !(flags().contrast && lib()));
+    const fr = document.getElementById("fc-rec-link"); if (fr) fr.classList.toggle("hidden", !(flags().contrast && lib() && window.FC));
+    if (App._ext.LiveStatus && App._ext.LiveStatus.current()) App._ext.LiveStatus.set(App._ext.LiveStatus.current());   // refresh the dots
   }
 
   // ======================================================================= F1: Interview + alignment
@@ -1023,6 +1026,128 @@ const Ext = (function () {
     R.cards.forEach(card => box.appendChild(renderCard(card, nameOf(R.query, name))));
     requestAnimationFrame(() => R.cards.forEach(card => drawEgo(card)));
   }
+  // ---- contrast picker (Interview header button, Formulation Contrast step): 2-3 look-alike patients, no mechanisms ----
+  const PICK = {};                          // pid -> recommendation response
+  function canContrast() { return !!(ext() && flags().contrast && lib()); }
+  const pickName = p => (State.profile && State.profile.identity && State.profile.identity.name) || p;
+  function closePicker() { const m = document.getElementById("pk-back"); if (m) m.remove(); document.removeEventListener("keydown", pickKey); }
+  function pickKey(ev) { if (ev.key === "Escape") closePicker(); }
+  function pickShell(title) {
+    closePicker();
+    const back = el("div", { class: "pk-back", id: "pk-back" }), box = el("div", { class: "pk", role: "dialog", "aria-modal": "true", "aria-label": title });
+    box.innerHTML = `<div class="pk-h"><h3>${esc(title)}</h3><button type="button" class="ghost small pk-x" aria-label="Close">✕</button></div><div class="pk-body"></div>`;
+    back.appendChild(box); document.body.appendChild(back);
+    back.addEventListener("click", ev => { if (ev.target === back) closePicker(); });
+    box.querySelector(".pk-x").addEventListener("click", closePicker);
+    document.addEventListener("keydown", pickKey);
+    return box.querySelector(".pk-body");
+  }
+  function sharedOf(card) {                 // the shared presenting problem (focus concept) + other shared surface symptoms
+    const sh = (card.shared_surface || []).map(x => typeof x === "string" ? { name: x } : x);
+    const f = card.target_concept_id || card.default_focus;
+    const main = sh.find(x => x.concept_id && x.concept_id === f) || sh[0] || { name: "" };
+    return { main: main.name || "", more: sh.filter(x => x !== main).map(x => x.name).filter(Boolean).slice(0, 2) };
+  }
+  const PICKTXT = {};                       // pid -> {candidate: {chips, why}} (model-written once, cached server-side)
+  function pickMeta(c) {                    // "Female · Adult (26–40)": omit unknown fields, never a bare number
+    const t = c.patient || {}, e = (State.existing || []).find(p => "p" + String(p.index).padStart(3, "0") === c.patient_id) || {};
+    const g = (t.gender || e.gender || "").trim(), band = (t.age_bucket || e.age_bucket || "").replace(/-/g, "–").trim();
+    return [g && !/^unknown|unspecified$/i.test(g) ? g.charAt(0).toUpperCase() + g.slice(1).toLowerCase() : "",
+            band && !/^(unknown|unspecified)$/i.test(band) ? band : ""].filter(Boolean).join(" · ");
+  }
+  // the shared symptom the card is about first, then the rarer (more telling) ones; common ones last
+  function chipOrder(c, chips) {
+    const sh = (c.shared_surface || []).map((x, k) => ({ k, name: typeof x === "string" ? x : x.name, id: typeof x === "string" ? null : x.concept_id, prev: typeof x === "string" ? 50 : (x.prevalence ?? 50) }));
+    const labels = chips && chips.length === sh.length ? chips : sh.map(x => String(x.name || "").toLowerCase());
+    const f = c.target_concept_id || c.default_focus;
+    return sh.slice().sort((a, b) => ((b.id && b.id === f) - (a.id && a.id === f)) || (a.prev - b.prev) || (a.k - b.k)).map(x => labels[x.k]).filter(Boolean);
+  }
+  const pron = c => ({ female: "her", male: "him" })[(((c.patient || {}).gender) || "").toLowerCase()] || "them";
+  async function pickContrast() {
+    if (!canContrast()) { toast("Contrast patients are available for library patients only."); return; }
+    const pid = State.patientId, name = pickName(pid);
+    const body = pickShell(`Contrast ${name} with a look-alike patient`);
+    body.innerHTML = `<p class="muted"><span class="spinner tiny"></span> Finding patients who look like ${esc(name)}…</p>`;
+    let rec, txt;
+    try {
+      [rec, txt] = await Promise.all([PICK[pid] || api("/api/ext/recommend/" + pid),
+        PICKTXT[pid] || api("/api/ext/recommend/" + pid + "/picker").then(r => Object.fromEntries((r.cards || []).map(c => [c.patient_id, c]))).catch(() => ({}))]);
+      PICK[pid] = rec; PICKTXT[pid] = txt;
+    } catch (e) { body.innerHTML = `<p class="muted">Recommendation failed: ${esc(e.message)}</p>`; return; }
+    if (!document.getElementById("pk-back")) return;          // closed while loading
+    const cards = (rec.cards || []).slice(0, 3);
+    const round = window.FC && FC.has() && FC.state().mode === "live" && FC.state().pa === pid ? FC.state() : null;
+    body.innerHTML = `<p class="pk-lead">Same presenting problem, different reasons behind it. Pick one, then ask both the same questions.</p>
+      <ol class="pk-list">${cards.map((c, i) => { const t = c.patient || {}, x = txt[c.patient_id] || {}, chips = chipOrder(c, x.chips), meta = pickMeta(c);
+        return `<li class="pk-card" data-i="${i}">
+          <div class="pk-top"><span class="pk-rank">#${c.rank || i + 1}</span><span class="pk-name">${esc(t.name || c.patient_id)}</span>${meta ? `<span class="pk-meta">${esc(meta)}</span>` : ""}
+            <button type="button" class="primary small pk-go">Contrast →</button></div>
+          <div class="pk-both"><span class="pk-lab">Both:</span>${chips.map((ch, k) => `<span class="pk-chip${k >= 2 ? " more hidden" : ""}">${esc(ch)}</span>`).join("")}${chips.length > 2 ? `<button type="button" class="pk-plus" aria-expanded="false">+${chips.length - 2}</button>` : ""}</div>
+          ${x.why ? `<p class="pk-why"><span class="pk-whylab">Why ${pron(c)}</span> ${esc(x.why)}</p>` : ""}
+          ${c.probe_question ? `<button type="button" class="pk-qbtn" aria-expanded="false">▸ Show a question to start with</button><div class="pk-q hidden">“${esc(c.probe_question)}”</div>` : ""}
+        </li>`; }).join("")}</ol>
+      <div class="pk-foot"><span class="pk-note">Each patient's causes stay hidden until you finish the round.</span>
+        ${round ? `<button type="button" class="ghost small" id="pk-return">Return to your round with ${esc(round.names.b)}</button>` : ""}
+        <button type="button" class="ghost small" id="pk-all">Browse all contrast patients</button></div>`;
+    body.querySelectorAll(".pk-card").forEach(li => {
+      const c = cards[+li.dataset.i];
+      li.querySelector(".pk-go").addEventListener("click", () => pickStart(c));
+      const plus = li.querySelector(".pk-plus");
+      if (plus) plus.addEventListener("click", () => { li.querySelectorAll(".pk-chip.more").forEach(x => x.classList.remove("hidden")); plus.remove(); });
+      const qb = li.querySelector(".pk-qbtn");
+      if (qb) qb.addEventListener("click", () => { const q = li.querySelector(".pk-q"), open = q.classList.toggle("hidden") === false;
+        qb.textContent = open ? "▾ Hide question" : "▸ Show a question to start with"; qb.setAttribute("aria-expanded", open); li.classList.toggle("open", open); });
+    });
+    body.querySelector("#pk-all").addEventListener("click", () => { closePicker(); findContrast(); });
+    const rt = body.querySelector("#pk-return"); if (rt) rt.addEventListener("click", () => { closePicker(); show("fc"); });
+  }
+  function pickStart(card) {
+    const pid = State.patientId, name = pickName(pid), bname = (card.patient && card.patient.name) || card.patient_id;
+    const qa = window.Interview && Interview.liveQA ? Interview.liveQA(pid) : [], live = App.liveOn();
+    const body = pickShell(`${name} and ${bname}`);
+    body.innerHTML = `<p class="pk-lead">How do you want to start?</p>
+      <div class="pk-opts">
+        <button type="button" class="pk-opt" id="pk-fresh"${live ? "" : " disabled"}><b>Start fresh</b><span>An empty trajectory: ask both patients new questions.</span></button>
+        <button type="button" class="pk-opt" id="pk-replay"${live && qa.length ? "" : " disabled"}><b>Ask ${esc(bname)} the questions you already asked ${esc(name)}</b>
+          <span>${qa.length ? `${qa.length} question${qa.length === 1 ? "" : "s"} from your interview. ${esc(name)}'s answers come from that interview; ${esc(bname)} answers them now.` : `You have not asked ${esc(name)} anything in a live interview yet.`}</span></button>
+      </div>
+      ${live ? "" : `<p class="pk-off">${esc(App.liveOffMsg())}</p><button type="button" class="ghost small" id="pk-rec">See a recorded Formulation Contrast example</button>`}
+      <div class="pk-foot"><button type="button" class="ghost small" id="pk-backlist">← Other patients</button></div>`;
+    const focus = card.target_concept_id || card.default_focus, from = { pid, name };
+    const presenting = sharedOf(card).main;
+    body.querySelector("#pk-fresh").addEventListener("click", () => { closePicker(); FC.openLive(pid, card.patient_id, card.probe_question, focus, { from, presenting }); });
+    body.querySelector("#pk-replay").addEventListener("click", () => reviewQuestions(card, qa, { from, presenting, focus }));
+    body.querySelector("#pk-backlist").addEventListener("click", pickContrast);
+    const r = body.querySelector("#pk-rec"); if (r) r.addEventListener("click", () => { closePicker(); FC.openRecorded(); });
+  }
+
+  // Before replaying the trainee's Interview questions to the contrast patient: names swapped, and the questions that
+  // depend on the first patient's own details flagged; the trainee can skip or edit each one.
+  async function reviewQuestions(card, qa, o) {
+    const pid = State.patientId, name = pickName(pid), bname = (card.patient && card.patient.name) || card.patient_id;
+    const body = pickShell(`Ask ${bname} your questions to ${name}`);
+    body.innerHTML = `<p class="muted"><span class="spinner tiny"></span> Adapting your ${qa.length} questions for ${esc(bname)}…</p>`;
+    let items;
+    try { items = (await App._ext.apiT("/api/ext/fc/adapt", { patient_a: pid, patient_b: card.patient_id, questions: qa.map(x => x.q) }, 60000)).items; }
+    catch (e) { items = qa.map(x => ({ original: x.q, adapted: x.q.replace(new RegExp("\\b" + name + "\\b", "g"), bname), flag: false })); }
+    if (!document.getElementById("pk-back")) return;
+    const nflag = items.filter(x => x.flag).length;
+    body.innerHTML = `<p class="pk-lead">${esc(name)}'s answers come from your interview; ${esc(bname)} answers these now. ${nflag ? `<b>${nflag}</b> question${nflag === 1 ? " depends" : "s depend"} on details only ${esc(name)} mentioned: they start unticked with a neutral wording; tick to include, or edit.` : "Edit any question before replaying."}</p>
+      <ol class="rv-list">${items.map((x, i) => `<li class="rv-q${x.flag ? " flagged" : ""}">
+          <label class="rv-inc"><input type="checkbox" data-i="${i}"${x.flag ? "" : " checked"}><span>Q${i + 1}</span></label>
+          <div class="rv-body"><input type="text" class="rv-text" data-i="${i}" value="${esc(x.flag && x.neutral ? x.neutral : x.adapted)}" aria-label="Question ${i + 1} for ${esc(bname)}" title="Asked to ${esc(name)}: ${esc(x.original)}">
+            ${x.flag ? `<div class="rv-flag">Depends on ${esc(name)}'s details${x.reason ? ": " + esc(x.reason) : ""}</div>` : ""}</div></li>`).join("")}</ol>
+      <div class="pk-foot"><button type="button" class="ghost small" id="rv-back">← Back</button><button type="button" class="primary small" id="rv-go"></button></div>`;
+    const go = body.querySelector("#rv-go"), boxes = [...body.querySelectorAll(".rv-inc input")], texts = [...body.querySelectorAll(".rv-text")];
+    const count = () => { const n = boxes.filter((b, i) => b.checked && texts[i].value.trim()).length; go.textContent = `Replay ${n} question${n === 1 ? "" : "s"}`; go.disabled = !n; };
+    boxes.forEach(b => b.addEventListener("change", count)); texts.forEach(t => t.addEventListener("input", count)); count();
+    body.querySelector("#rv-back").addEventListener("click", () => pickStart(card));
+    go.addEventListener("click", () => {
+      const list = qa.map((x, i) => ({ q: texts[i].value.trim(), a: x.a, asked: x.q })).filter((x, i) => boxes[i].checked && x.q);
+      closePicker(); FC.openLive(pid, card.patient_id, null, o.focus, { from: o.from, presenting: o.presenting, replay: list });
+    });
+  }
+
   // "<name> <symptom> because: <causes>" from the card's valid citations (the symptom most causes point into)
   function becauseOf(card, side) {
     const cites = (card.citations || []).filter(x => x.valid && x.side === side);
@@ -1091,7 +1216,7 @@ const Ext = (function () {
         openDual(State.patientId, card.patient_id, probe, { a: State.network }, false, f);
       });
       if (!App.liveOn()) {   // browse mode: no live sessions; offer the recorded examples instead
-        go.disabled = true; go.title = App.LIVE_OFF_MSG;
+        go.disabled = true; go.title = App.liveOffMsg();
         const ex = el("button", { class: "ghost small", type: "button" }, ["See a recorded example"]);
         ex.addEventListener("click", () => openReplay());
         act.appendChild(el("div", { class: "actions" }, [ex, go]));
@@ -1133,6 +1258,7 @@ const Ext = (function () {
   const SESS = {};          // "<a>|<b>" -> D : going Back and reopening the same pair restores the conversation
   const emptyState = () => ({ a: { n: new Set(), e: new Set() }, b: { n: new Set(), e: new Set() } });
   async function openDual(a, b, probe, nets, fresh, focus) {
+    if (window.FC) { if (!App.liveOn()) { toast(App.liveOffMsg()); return; } return FC.openLive(a, b, probe, focus); }   // Formulation Contrast
     if (!App.liveOn()) { toast(App.LIVE_OFF_MSG); return; }
     if (!flags().dual) return;
     show("dual");
@@ -1210,6 +1336,7 @@ const Ext = (function () {
   let RP = null;
   async function openReplay(caseId) {
     if (!flags().dual) return;
+    if (window.FC) return FC.openRecorded(caseId);                 // Formulation Contrast
     let list = [], idx = {};
     try { idx = await api("/api/ext/replay"); list = idx.cases || []; } catch (e) { toast("Examples unavailable: " + e.message); return; }
     if (!list.length) { toast("No examples available."); return; }
@@ -1807,7 +1934,7 @@ const Ext = (function () {
     catch (e) { toast("Export failed: " + e.message); }
   }
 
-  return { onShow, onPatientLoaded, onChatStart, onPatientReply, findContrast, exportAlignment, exportRecommendation,
+  return { onShow, onPatientLoaded, onChatStart, onPatientReply, findContrast, pickContrast, canContrast, exportAlignment, exportRecommendation,
     openDual, backToContrast, askShared, askFollow, sendDual, exportComparison, toggleNet, toggleFull, toggleAllSymptoms, toggleFocusMenu, closeMenus,
     openReplay, newSession, exitReplay, setPaper, togglePaper, shownAnswer,
     _state: () => ({ C, R, D }) };

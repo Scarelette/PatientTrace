@@ -1,0 +1,723 @@
+{
+ "patient_id": "p000",
+ "index": 0,
+ "name": "Leila",
+ "kind": "recorded interview",
+ "recorded": "2026-11-26T00:56",
+ "source": "scripted trainee questions (scripts/interview_scripts.json); patient replies from the deployed patient model; alignment by the frozen F1 aligner; explanations AI-generated (patienttrace/interview.py)",
+ "turns": [
+  {
+   "who": "t",
+   "text": "Hi Leila, thank you for coming in. What brings you here today?"
+  },
+  {
+   "who": "p",
+   "text": "My head hurts again. I’ve had this tightness since yesterday, and I’m tired all the time—like I haven’t slept properly even though I try.",
+   "active": [
+    "n24",
+    "n22",
+    "n23"
+   ],
+   "kinds": {
+    "n24": "said",
+    "n22": "said",
+    "n23": "said"
+   },
+   "confidence": {
+    "n24": 0.9,
+    "n22": 0.85,
+    "n23": 0.6
+   },
+   "spans": [
+    {
+     "start": 0,
+     "end": 19,
+     "text": "My head hurts again",
+     "node": "n24"
+    },
+    {
+     "start": 66,
+     "end": 88,
+     "text": "I’m tired all the time",
+     "node": "n22"
+    },
+    {
+     "start": 89,
+     "end": 136,
+     "text": "like I haven’t slept properly even though I try",
+     "node": "n23"
+    }
+   ],
+   "themes": [],
+   "path": [
+    [
+     "n23",
+     "n22"
+    ],
+    [
+     "n23",
+     "n24"
+    ]
+   ],
+   "trigger": null,
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "Leading with the body",
+    "surface": "Leila opens with physical complaints: a returning headache, tightness since yesterday, and constant tiredness despite trying to sleep.",
+    "under": "Her poor sleep seems to sit at the centre: it likely feeds both the exhaustion and the headaches. She presents these as a bodily cluster, which may feel safer to share first than anything emotional.",
+    "tip": "Take the physical complaints seriously and stay curious about them. Showing genuine interest in her body's distress builds trust, especially with someone who tests honesty. Avoid rushing toward feelings before she's ready.",
+    "instead": "That sounds exhausting, headaches and tiredness that sleep doesn't fix, can you tell me what your nights have been like lately?",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n24",
+      "kind": "said",
+      "confidence": 0.9,
+      "span": {
+       "start": 0,
+       "end": 19,
+       "text": "My head hurts again"
+      }
+     },
+     {
+      "node": "n22",
+      "kind": "said",
+      "confidence": 0.85,
+      "span": {
+       "start": 66,
+       "end": 88,
+       "text": "I’m tired all the time"
+      }
+     },
+     {
+      "node": "n23",
+      "kind": "said",
+      "confidence": 0.6,
+      "span": {
+       "start": 89,
+       "end": 136,
+       "text": "like I haven’t slept properly even though I try"
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": null,
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n22",
+    "n23",
+    "n24"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "What does a typical day feel like for you lately?"
+  },
+  {
+   "who": "p",
+   "text": "I wake up before dawn, pray quietly, and cook breakfast. Then I go to school. By afternoon, I’m exhausted, and I can’t focus much. Sometimes I hear those tiny voices...",
+   "active": [
+    "n22"
+   ],
+   "kinds": {
+    "n22": "said"
+   },
+   "confidence": {
+    "n22": 0.9
+   },
+   "spans": [
+    {
+     "start": 78,
+     "end": 129,
+     "text": "By afternoon, I’m exhausted, and I can’t focus much",
+     "node": "n22"
+    }
+   ],
+   "themes": [],
+   "path": [],
+   "trigger": null,
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "Tired by afternoon",
+    "surface": "Leila calmly lists a disciplined routine of early prayer, cooking and school, then admits to afternoon exhaustion and poor focus, and trails off mentioning tiny voices.",
+    "under": "Her afternoon exhaustion seems out of proportion to what her day involves. Her steady, dutiful morning account may hide how drained she actually feels. The voices she mentions did not map onto her network.",
+    "tip": "Don't rush past either thread. Acknowledge the tiredness first so she feels heard, then gently open space for the voices without sounding alarmed or doubtful, since she may be testing how you react.",
+    "instead": "It sounds like you start the day with a lot of care and effort, and by afternoon there is not much left; you also mentioned hearing tiny voices, and I would like to hear about that whenever you feel ready.",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n22",
+      "kind": "said",
+      "confidence": 0.9,
+      "span": {
+       "start": 78,
+       "end": 129,
+       "text": "By afternoon, I’m exhausted, and I can’t focus much"
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": null,
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n8",
+    "n22"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "How are things at home with your husband?"
+  },
+  {
+   "who": "p",
+   "text": "He’s quiet most of the time. We argue sometimes—he calls his coworkers too often, and I think he’s hiding something.",
+   "active": [
+    "n31",
+    "n34",
+    "n36"
+   ],
+   "kinds": {
+    "n31": "said",
+    "n34": "said",
+    "n36": "said"
+   },
+   "confidence": {
+    "n31": 0.85,
+    "n34": 0.7,
+    "n36": 0.8
+   },
+   "spans": [
+    {
+     "start": 29,
+     "end": 47,
+     "text": "We argue sometimes",
+     "node": "n36"
+    },
+    {
+     "start": 48,
+     "end": 80,
+     "text": "he calls his coworkers too often",
+     "node": "n34"
+    },
+    {
+     "start": 86,
+     "end": 115,
+     "text": "I think he’s hiding something",
+     "node": "n31"
+    }
+   ],
+   "themes": [],
+   "path": [
+    [
+     "n31",
+     "n36"
+    ],
+    [
+     "n34",
+     "n31"
+    ],
+    [
+     "n34",
+     "n36"
+    ]
+   ],
+   "trigger": {
+    "phrase": "How are things at home with your husband?",
+    "node": "n36",
+    "source": "aligner"
+   },
+   "trigger_link": {
+    "from": "n36",
+    "to": "n34",
+    "dotted": true
+   },
+   "eased": [],
+   "guidance": {
+    "title": "Suspicion behind the arguments",
+    "surface": "Leila describes her husband as quiet, mentions occasional arguments, and voices a guarded suspicion that he is hiding something because of his frequent calls.",
+    "under": "His calls with coworkers feed her suspicion that he may be unfaithful. That suspicion, together with the calls themselves, fuels the arguments between them. She names the suspicion only softly, so the full worry is likely bigger than she shows.",
+    "tip": "She has just offered something vulnerable but hedged it. Stay curious about the suspicion without judging whether it is true. Mistrust matters to her, so a calm, steady response helps her feel safe enough to say more.",
+    "instead": "You said you think he's hiding something, and I'd like to understand what makes you feel that way when he's on those calls.",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n31",
+      "kind": "said",
+      "confidence": 0.85,
+      "span": {
+       "start": 86,
+       "end": 115,
+       "text": "I think he’s hiding something"
+      }
+     },
+     {
+      "node": "n34",
+      "kind": "said",
+      "confidence": 0.7,
+      "span": {
+       "start": 48,
+       "end": 80,
+       "text": "he calls his coworkers too often"
+      }
+     },
+     {
+      "node": "n36",
+      "kind": "said",
+      "confidence": 0.8,
+      "span": {
+       "start": 29,
+       "end": 47,
+       "text": "We argue sometimes"
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": {
+     "phrase": "How are things at home with your husband?",
+     "node": "n36",
+     "source": "aligner"
+    },
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n18",
+    "n31",
+    "n36"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "What goes through your mind when he's on the phone late at night?"
+  },
+  {
+   "who": "p",
+   "text": "It makes me anxious. I wonder if he’s talking to someone else, and I start checking his messages.",
+   "active": [
+    "n21",
+    "n31",
+    "n5"
+   ],
+   "kinds": {
+    "n21": "said",
+    "n31": "said",
+    "n5": "said"
+   },
+   "confidence": {
+    "n21": 0.8,
+    "n31": 0.9,
+    "n5": 0.9
+   },
+   "spans": [
+    {
+     "start": 0,
+     "end": 20,
+     "text": "It makes me anxious.",
+     "node": "n21"
+    },
+    {
+     "start": 21,
+     "end": 61,
+     "text": "I wonder if he’s talking to someone else",
+     "node": "n31"
+    },
+    {
+     "start": 67,
+     "end": 96,
+     "text": "I start checking his messages",
+     "node": "n5"
+    }
+   ],
+   "themes": [],
+   "path": [
+    [
+     "n31",
+     "n5"
+    ],
+    [
+     "n34",
+     "n31"
+    ]
+   ],
+   "trigger": {
+    "phrase": "when he's on the phone late at night",
+    "node": "n34",
+    "source": "aligner"
+   },
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "The checking loop",
+    "surface": "Leila names her anxiety plainly and admits she starts checking his messages when he's on late-night calls.",
+    "under": "His late-night calls set off her suspicion that he is being unfaithful. That suspicion drives her to check his phone, with fear running alongside. Checking is how she tries to settle the doubt.",
+    "tip": "She has just admitted something she may feel ashamed of. Stay curious, not judging. Explore what checking gives her and what it costs, rather than whether her suspicion is right.",
+    "instead": "When you check his messages, what are you hoping to find or not find, and how do you feel afterwards?",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n21",
+      "kind": "said",
+      "confidence": 0.8,
+      "span": {
+       "start": 0,
+       "end": 20,
+       "text": "It makes me anxious."
+      }
+     },
+     {
+      "node": "n31",
+      "kind": "said",
+      "confidence": 0.9,
+      "span": {
+       "start": 21,
+       "end": 61,
+       "text": "I wonder if he’s talking to someone else"
+      }
+     },
+     {
+      "node": "n5",
+      "kind": "said",
+      "confidence": 0.9,
+      "span": {
+       "start": 67,
+       "end": 96,
+       "text": "I start checking his messages"
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": {
+     "phrase": "when he's on the phone late at night",
+     "node": "n34",
+     "source": "aligner"
+    },
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n5",
+    "n18",
+    "n21",
+    "n31",
+    "n34"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "When you feel that suspicion, what do you usually do?"
+  },
+  {
+   "who": "p",
+   "text": "I can’t stop thinking about it. I check his phone every chance I get, even if I know it’s wrong.",
+   "active": [
+    "n5",
+    "n31"
+   ],
+   "kinds": {
+    "n5": "said",
+    "n31": "implied"
+   },
+   "confidence": {
+    "n5": 0.95,
+    "n31": 0.75
+   },
+   "spans": [
+    {
+     "start": 0,
+     "end": 30,
+     "text": "I can’t stop thinking about it",
+     "node": "n31"
+    },
+    {
+     "start": 32,
+     "end": 68,
+     "text": "I check his phone every chance I get",
+     "node": "n5"
+    }
+   ],
+   "themes": [],
+   "path": [
+    [
+     "n31",
+     "n5"
+    ]
+   ],
+   "trigger": null,
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "The phone-checking loop",
+    "surface": "Leila admits she can't stop the suspicious thoughts and checks her husband's phone whenever she can, while acknowledging she knows it's wrong.",
+    "under": "Her worry that her husband is unfaithful is likely what's churning in her mind, though she doesn't name it outright. That suspicion drives the phone-checking, a way to try to settle the doubt.",
+    "tip": "She's shown some shame ('I know it's wrong'). Stay curious and non-judgmental so she keeps talking. Exploring what happens just before and after she checks can reveal what the checking does for her.",
+    "instead": "It sounds like the thoughts really grip you. What do you feel right after you've checked his phone?",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n5",
+      "kind": "said",
+      "confidence": 0.95,
+      "span": {
+       "start": 32,
+       "end": 68,
+       "text": "I check his phone every chance I get"
+      }
+     },
+     {
+      "node": "n31",
+      "kind": "implied",
+      "confidence": 0.75,
+      "span": {
+       "start": 0,
+       "end": 30,
+       "text": "I can’t stop thinking about it"
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": null,
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n5",
+    "n31"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "You mentioned your in-laws. How does your family fit into all this?"
+  },
+  {
+   "who": "p",
+   "text": "They’re always asking about money. I don’t want to admit anything—I’d rather hide it.",
+   "active": [
+    "n1",
+    "n35"
+   ],
+   "kinds": {
+    "n1": "said",
+    "n35": "said"
+   },
+   "confidence": {
+    "n1": 0.85,
+    "n35": 0.55
+   },
+   "spans": [
+    {
+     "start": 0,
+     "end": 34,
+     "text": "They’re always asking about money.",
+     "node": "n35"
+    },
+    {
+     "start": 35,
+     "end": 85,
+     "text": "I don’t want to admit anything—I’d rather hide it.",
+     "node": "n1"
+    }
+   ],
+   "themes": [],
+   "path": [],
+   "trigger": {
+    "phrase": "You mentioned your in-laws.",
+    "node": "n35",
+    "source": "aligner"
+   },
+   "trigger_link": {
+    "from": "n35",
+    "to": "n35",
+    "dotted": true
+   },
+   "eased": [],
+   "guidance": {
+    "title": "Money talk, closed door",
+    "surface": "Leila names her in-laws' constant questions about money, then says plainly she'd rather hide things than admit anything.",
+    "under": "Mentioning the in-laws brings up their pressure around money, and her response is to keep family finances out of view. No link between the two is recorded, but in the moment the hiding follows the pressure.",
+    "tip": "She has openly told you she wants to hide. That honesty is a small act of trust. Name it gently and don't push for the financial details yet. Let her set the pace.",
+    "instead": "It sounds like those money questions put a lot of pressure on you, so what feels most important to keep private right now?",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [
+     {
+      "node": "n1",
+      "kind": "said",
+      "confidence": 0.85,
+      "span": {
+       "start": 35,
+       "end": 85,
+       "text": "I don’t want to admit anything—I’d rather hide it."
+      }
+     },
+     {
+      "node": "n35",
+      "kind": "said",
+      "confidence": 0.55,
+      "span": {
+       "start": 0,
+       "end": 34,
+       "text": "They’re always asking about money."
+      }
+     }
+    ],
+    "themes": [],
+    "trigger": {
+     "phrase": "You mentioned your in-laws.",
+     "node": "n35",
+     "source": "aligner"
+    },
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": [
+    "n1"
+   ]
+  },
+  {
+   "who": "t",
+   "text": "Some people have experiences they find hard to explain to others. Is there anything like that for you?"
+  },
+  {
+   "who": "p",
+   "text": "Sometimes I hear whispers.",
+   "active": [],
+   "kinds": {},
+   "confidence": {},
+   "spans": [],
+   "themes": [
+    {
+     "theme": "t2",
+     "label": "Religious Rituals and Beliefs",
+     "members": [
+      "n6",
+      "n7",
+      "n26",
+      "n29"
+     ],
+     "confidence": 0.6,
+     "span": {
+      "start": 0,
+      "end": 26,
+      "text": "Sometimes I hear whispers."
+     }
+    }
+   ],
+   "path": [],
+   "trigger": null,
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "A cautious disclosure",
+    "surface": "Leila offers a short, careful admission that she sometimes hears whispers, saying little else and watching how it lands.",
+    "under": "No specific part of her network matched this reply. It fits loosely with her religious and spiritual beliefs, so she may understand the whispers in spiritual terms rather than as a symptom.",
+    "tip": "Your gentle, normalising question opened the door. Stay curious and calm. Ask about her own meaning before labelling anything, because a worried or clinical reaction could make her close up again.",
+    "instead": "Thank you for trusting me with that. What are the whispers like, and what do you think they are?",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [],
+    "themes": [
+     {
+      "theme": "t2",
+      "label": "Religious Rituals and Beliefs",
+      "members": [
+       "n6",
+       "n7",
+       "n26",
+       "n29"
+      ],
+      "confidence": 0.6,
+      "span": {
+       "start": 0,
+       "end": 26,
+       "text": "Sometimes I hear whispers."
+      }
+     }
+    ],
+    "trigger": null,
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "f1_active": []
+  },
+  {
+   "who": "t",
+   "text": "It sounds like you've been carrying a lot on your own, and staying strong for everyone. That must be exhausting."
+  },
+  {
+   "who": "p",
+   "text": "Thank you.",
+   "active": [],
+   "kinds": {},
+   "confidence": {},
+   "spans": [],
+   "themes": [],
+   "path": [],
+   "trigger": null,
+   "trigger_link": null,
+   "eased": [],
+   "guidance": {
+    "title": "A polite, closed thanks",
+    "surface": "Leila accepts the trainee's empathy with a short, courteous 'Thank you' and offers nothing more.",
+    "under": "This brief reply did not map onto her network. It may be simple appreciation, or a graceful way of acknowledging the comment while keeping the door only slightly open, without showing how much the exhaustion really lands.",
+    "tip": "Don't rush to fill the pause or pile on more empathy. A short thanks can mean the words touched something she isn't ready to say. Gently and lightly invite her to say more.",
+    "instead": "I noticed you said thank you, and I wonder what it's like to hear someone name how tiring this has been.",
+    "model": "claude-opus-5-5",
+    "version": "interview-guidance-v2"
+   },
+   "alignment": {
+    "version": "interview-align-v1",
+    "level": "normal",
+    "nodes": [],
+    "themes": [],
+    "trigger": null,
+    "eased": [],
+    "model": "claude-opus-5-5"
+   },
+   "suggested": {
+    "empty": true
+   },
+   "f1_active": []
+  }
+ ],
+ "aligner": "interview-align-v1",
+ "reenriched": "interview-align-v1 + guidance-v2 from the alignment; replies unchanged"
+}

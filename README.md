@@ -69,6 +69,13 @@ patienttrace serve --worker-url http://<gpu-host>:7900
 
 `patienttrace check` shows whether the data, the API key and the worker are found.
 
+## Live mode on a Slurm cluster
+
+The patient model runs as a Slurm job (`scripts/live_worker.slurm`, one large GPU while up; fill in `scripts/site.env` from `scripts/site.env.example`). Use
+`scripts/live_mode.sh demo on 3` before a demo (keeps one worker for 3 h, resubmitted before its time limit by
+a site watchdog running `scripts/worker_keepalive.py`), `scripts/live_mode.sh autostart on|off` to let a visitor's first live page start one
+(rate-limited, daily cap), and `scripts/live_mode.sh status`. Details: [docs/LIVE_MODE.md](docs/LIVE_MODE.md).
+
 ## Configuration
 
 | Variable | Default | Purpose |

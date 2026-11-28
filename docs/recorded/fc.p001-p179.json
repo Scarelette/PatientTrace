@@ -1,0 +1,526 @@
+{
+ "patient_a": "p001",
+ "patient_b": "p179",
+ "names": {
+  "a": "Emily",
+  "b": "Evelyn"
+ },
+ "probe": "When you are lying awake at night, what is your mind busy with, and what feels like it would happen if you let yourself fall asleep?",
+ "focus": "P0001",
+ "focus_name": "Insomnia and Sleep Disruption",
+ "tags": {
+  "a": {
+   "patient_id": "p001",
+   "name": "Emily",
+   "gender": "female",
+   "age_bucket": "Adult (26-40)",
+   "culture": "Unspecified",
+   "disorders": [
+    "Anxiety",
+    "Depression",
+    "PTSD / Trauma"
+   ],
+   "primary_disorder": "Anxiety"
+  },
+  "b": {
+   "patient_id": "p179",
+   "name": "Evelyn",
+   "gender": "female",
+   "age_bucket": "Older adult (65+)",
+   "culture": "Unspecified",
+   "disorders": [
+    "Anxiety",
+    "PTSD / Trauma",
+    "Psychosis",
+    "Personality"
+   ],
+   "primary_disorder": "Anxiety"
+  }
+ },
+ "case_id": "fc.p001-p179",
+ "kind": "formulation-contrast",
+ "note": "Insomnia and Sleep Disruption",
+ "source": "shared questions and answers from live.p001-p179 | re-aligned with interview-align-v2, gap fc-gap-v6",
+ "turns": [
+  {
+   "question": "When you are lying awake at night, what is your mind busy with, and what feels like it would happen if you let yourself fall asleep?",
+   "a": {
+    "response": "My mind keeps looping through those heart-racing moments—like last week when I felt that sharp pain and thought maybe I was having a stroke. I end up imagining all the worst-case scenarios: what if the doctors tell me I need another surgery? Or worse, what if I don’t wake up this time? If I try to go to sleep, I just freeze, like my brain’s stuck on replay mode.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n16",
+       "type": "Physiological Sensation",
+       "label": "Episodic fast heartbeat (tachycardia)",
+       "words": "those heart-racing moments",
+       "kind": "said",
+       "confidence": 0.8
+      },
+      {
+       "node": "n23",
+       "type": "Cognition",
+       "label": "They'll ask me to undergo another surgery soon",
+       "words": "what if the doctors tell me I need another surgery?",
+       "kind": "said",
+       "confidence": 0.9
+      },
+      {
+       "node": "n27",
+       "type": "Cognition",
+       "label": "What if I have to be sedated again and can't wake up?",
+       "words": "what if I don’t wake up this time?",
+       "kind": "said",
+       "confidence": 0.85
+      },
+      {
+       "node": "n10",
+       "type": "Emotion",
+       "label": "anticipatory anxiety",
+       "words": "I end up imagining all the worst-case scenarios",
+       "kind": "implied",
+       "confidence": 0.65
+      },
+      {
+       "node": "n18",
+       "type": "Physiological Sensation",
+       "label": "Insomnia with frequent nighttime awakenings",
+       "words": "If I try to go to sleep, I just freeze",
+       "kind": "implied",
+       "confidence": 0.7
+      }
+     ],
+     "themes": []
+    }
+   },
+   "b": {
+    "response": "My mind keeps replaying those sounds—like the floorboard creaks or the door rattling. I can’t stop thinking someone’s outside, waiting.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n36",
+       "type": "Stimulus",
+       "label": "Unusual nighttime sounds",
+       "words": "those sounds—like the floorboard creaks or the door rattling",
+       "kind": "said",
+       "confidence": 0.85
+      },
+      {
+       "node": "n27",
+       "type": "Cognition",
+       "label": "That sound is probably someone coming in",
+       "words": "I can’t stop thinking someone’s outside, waiting.",
+       "kind": "said",
+       "confidence": 0.8
+      },
+      {
+       "node": "n21",
+       "type": "Physiological Sensation",
+       "label": "nighttime hypervigilance",
+       "words": "",
+       "kind": "implied",
+       "confidence": 0.6
+      }
+     ],
+     "themes": []
+    }
+   },
+   "fc": {
+    "version": "fc-gap-v6",
+    "d": 0.59,
+    "method": "nodes",
+    "checked": [
+     {
+      "a_node": "n18",
+      "b_node": "n21",
+      "type": "Body",
+      "sim": 0.76,
+      "same": false,
+      "reason": "A's insomnia depletes resilience and fuels fatigue; B's hypervigilance scans for and magnifies threats.",
+      "label": ""
+     }
+    ],
+    "reading": "Emily reads her racing heart as a medical catastrophe and dreads never waking (health catastrophizing); Evelyn hears night sounds as an intruder (hypervigilant threat interpretation)",
+    "a": {
+     "gist": "imagines worst-case scenarios",
+     "unaligned": false,
+     "quote": "I end up imagining all the worst-case scenarios",
+     "main": "n10",
+     "items": [
+      {
+       "node": "n16",
+       "ntype": "Physiological Sensation",
+       "type": "Body",
+       "short": "Racing heartbeat",
+       "words": "those heart-racing moments",
+       "kind": "said"
+      },
+      {
+       "node": "n23",
+       "ntype": "Cognition",
+       "type": "Thought",
+       "short": "More surgery coming",
+       "words": "what if the doctors tell me I need another surgery?",
+       "kind": "said"
+      },
+      {
+       "node": "n27",
+       "ntype": "Cognition",
+       "type": "Thought",
+       "short": "Fear not waking up",
+       "words": "what if I don’t wake up this time?",
+       "kind": "said"
+      },
+      {
+       "node": "n10",
+       "ntype": "Emotion",
+       "type": "Feeling",
+       "short": "Anticipatory anxiety",
+       "words": "I end up imagining all the worst-case scenarios",
+       "kind": "implied"
+      },
+      {
+       "node": "n18",
+       "ntype": "Physiological Sensation",
+       "type": "Body",
+       "short": "Broken sleep",
+       "words": "If I try to go to sleep, I just freeze",
+       "kind": "implied"
+      }
+     ],
+     "n_nodes": 5
+    },
+    "b": {
+     "gist": "creaks and rattling replay",
+     "unaligned": false,
+     "quote": "those sounds—like the floorboard creaks or the door rattling",
+     "main": "n36",
+     "items": [
+      {
+       "node": "n36",
+       "ntype": "Stimulus",
+       "type": "Trigger",
+       "short": "Night sounds",
+       "words": "those sounds—like the floorboard creaks or the door rattling",
+       "kind": "said"
+      },
+      {
+       "node": "n27",
+       "ntype": "Cognition",
+       "type": "Thought",
+       "short": "Sound = intruder",
+       "words": "I can’t stop thinking someone’s outside, waiting.",
+       "kind": "said"
+      },
+      {
+       "node": "n21",
+       "ntype": "Physiological Sensation",
+       "type": "Body",
+       "short": "Night hypervigilance",
+       "words": "",
+       "kind": "implied"
+      }
+     ],
+     "n_nodes": 3
+    },
+    "both": [],
+    "g": 0.236
+   }
+  },
+  {
+   "question": "What do you usually do when you can't fall asleep?",
+   "a": {
+    "response": "I’ll grab my phone and start scrolling through articles about my symptoms, hoping it’ll distract me—or confirm I’m not going crazy. Sometimes I jot things down, like “chest tightness = anxiety,” just to get the thoughts off my mind. But lately, even writing doesn’t cut it. I’ve been using noise-canceling headphones too, trying to block out everything except the hum of the fan.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n5",
+       "type": "Behavior",
+       "label": "Excessive online symptom-searching for reassurance",
+       "words": "grab my phone and start scrolling through articles about my symptoms, hoping it’ll distract me—or confirm I’m not going crazy",
+       "kind": "said",
+       "confidence": 0.9
+      }
+     ],
+     "themes": []
+    }
+   },
+   "b": {
+    "response": "I lie there, staring at the ceiling. Sometimes I count breaths, but it doesn’t really work. I just wait for the light to flicker again.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n20",
+       "type": "Physiological Sensation",
+       "label": "insomnia",
+       "words": "I lie there, staring at the ceiling",
+       "kind": "implied",
+       "confidence": 0.75
+      },
+      {
+       "node": "n37",
+       "type": "Stimulus",
+       "label": "Unusual nighttime lights",
+       "words": "wait for the light to flicker again",
+       "kind": "said",
+       "confidence": 0.75
+      },
+      {
+       "node": "n21",
+       "type": "Physiological Sensation",
+       "label": "nighttime hypervigilance",
+       "words": "",
+       "kind": "implied",
+       "confidence": 0.6
+      }
+     ],
+     "themes": []
+    }
+   },
+   "fc": {
+    "version": "fc-gap-v6",
+    "d": 0.966,
+    "method": "nodes",
+    "checked": [],
+    "reading": "Emily scrolls symptom articles to calm her worry (reassurance seeking); Evelyn lies awake watching for the light to flicker (nighttime hypervigilance)",
+    "a": {
+     "gist": "scrolls symptom articles for reassurance",
+     "unaligned": false,
+     "quote": "grab my phone and start scrolling through articles about my symptoms, hoping it’ll distract me—or confirm I’m not going crazy",
+     "main": "n5",
+     "items": [
+      {
+       "node": "n5",
+       "ntype": "Behavior",
+       "type": "Behaviour",
+       "short": "Symptom googling",
+       "words": "grab my phone and start scrolling through articles about my symptoms, hoping it’ll distract me—or confirm I’m not going crazy",
+       "kind": "said"
+      }
+     ],
+     "n_nodes": 1
+    },
+    "b": {
+     "gist": "lies awake staring at ceiling",
+     "unaligned": false,
+     "quote": "I lie there, staring at the ceiling",
+     "main": "n20",
+     "items": [
+      {
+       "node": "n20",
+       "ntype": "Physiological Sensation",
+       "type": "Body",
+       "short": "Insomnia",
+       "words": "I lie there, staring at the ceiling",
+       "kind": "implied"
+      },
+      {
+       "node": "n37",
+       "ntype": "Stimulus",
+       "type": "Trigger",
+       "short": "Night lights",
+       "words": "wait for the light to flicker again",
+       "kind": "said"
+      },
+      {
+       "node": "n21",
+       "ntype": "Physiological Sensation",
+       "type": "Body",
+       "short": "Night hypervigilance",
+       "words": "",
+       "kind": "implied"
+      }
+     ],
+     "n_nodes": 3
+    },
+    "both": [],
+    "g": 0.528
+   }
+  },
+  {
+   "question": "Why do you think this keeps happening night after night?",
+   "a": {
+    "response": "It’s like my body’s always on alert now—something’s wrong, somewhere, always. Even when I lie still, I can feel my pulse speeding up, like my heart’s reminding me I’m not safe.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n16",
+       "type": "Physiological Sensation",
+       "label": "Episodic fast heartbeat (tachycardia)",
+       "words": "I can feel my pulse speeding up",
+       "kind": "said",
+       "confidence": 0.85
+      },
+      {
+       "node": "n21",
+       "type": "Cognition",
+       "label": "My body is unreliable and unpredictable",
+       "words": "my body’s always on alert now—something’s wrong, somewhere, always",
+       "kind": "implied",
+       "confidence": 0.7
+      }
+     ],
+     "themes": []
+    }
+   },
+   "b": {
+    "response": "It’s like my body won’t shut off. I’ve tried everything—counting sheep, closing my eyes—but nothing stops the noise.",
+    "alignment": {
+     "version": "interview-align-v2",
+     "nodes": [
+      {
+       "node": "n21",
+       "type": "Physiological Sensation",
+       "label": "nighttime hypervigilance",
+       "words": "It’s like my body won’t shut off",
+       "kind": "implied",
+       "confidence": 0.7
+      },
+      {
+       "node": "n20",
+       "type": "Physiological Sensation",
+       "label": "insomnia",
+       "words": "I’ve tried everything—counting sheep, closing my eyes—but nothing stops",
+       "kind": "implied",
+       "confidence": 0.65
+      }
+     ],
+     "themes": []
+    }
+   },
+   "fc": {
+    "version": "fc-gap-v6",
+    "d": 0.634,
+    "method": "nodes",
+    "checked": [],
+    "reading": "Emily reads her racing heartbeat as danger (catastrophic misreading of body sensations); Evelyn cannot switch off at night despite trying (hyperarousal sustaining insomnia)",
+    "a": {
+     "gist": "body always senses something wrong",
+     "unaligned": false,
+     "quote": "my body’s always on alert now—something’s wrong, somewhere, always",
+     "main": "n21",
+     "items": [
+      {
+       "node": "n16",
+       "ntype": "Physiological Sensation",
+       "type": "Body",
+       "short": "Racing heartbeat",
+       "words": "I can feel my pulse speeding up",
+       "kind": "said"
+      },
+      {
+       "node": "n21",
+       "ntype": "Cognition",
+       "type": "Thought",
+       "short": "Body is unreliable",
+       "words": "my body’s always on alert now—something’s wrong, somewhere, always",
+       "kind": "implied"
+      }
+     ],
+     "n_nodes": 2
+    },
+    "b": {
+     "gist": "nothing helps me fall asleep",
+     "unaligned": false,
+     "quote": "I’ve tried everything—counting sheep, closing my eyes—but nothing stops",
+     "main": "n20",
+     "items": [
+      {
+       "node": "n21",
+       "ntype": "Physiological Sensation",
+       "type": "Body",
+       "short": "Night hypervigilance",
+       "words": "It’s like my body won’t shut off",
+       "kind": "implied"
+      },
+      {
+       "node": "n20",
+       "ntype": "Physiological Sensation",
+       "type": "Body",
+       "short": "Insomnia",
+       "words": "I’ve tried everything—counting sheep, closing my eyes—but nothing stops",
+       "kind": "implied"
+      }
+     ],
+     "n_nodes": 2
+    },
+    "both": [],
+    "g": 0.57
+   }
+  }
+ ],
+ "reveal": {
+  "concept_id": "P0001",
+  "name": "Insomnia and Sleep Disruption",
+  "a": [
+   {
+    "node": "n5",
+    "label": "Excessive online symptom-searching for reassurance",
+    "short": "Symptom googling",
+    "type": "Behaviour",
+    "ntype": "Behavior",
+    "hint": "ask what she does online when worried about symptoms"
+   },
+   {
+    "node": "n26",
+    "label": "Will my heart ever be 'normal'?",
+    "short": "Will I be normal?",
+    "type": "Thought",
+    "ntype": "Cognition",
+    "hint": "ask what she wonders about her heart's long-term future"
+   },
+   {
+    "node": "n27",
+    "label": "What if I have to be sedated again and can't wake up?",
+    "short": "Fear not waking up",
+    "type": "Thought",
+    "ntype": "Cognition",
+    "hint": "ask what she fears could happen during medical procedures"
+   },
+   {
+    "node": "n31",
+    "label": "Mentions of surgery, anesthesia, or diagnostic tests",
+    "short": "Surgery/test mentions",
+    "type": "Trigger",
+    "ntype": "Stimulus",
+    "hint": "ask which conversations or medical plans make her anxiety spike"
+   },
+   {
+    "node": "n34",
+    "label": "Chronic congenital heart condition with uncertain prognosis",
+    "short": "Congenital heart issue",
+    "type": "Trigger",
+    "ntype": "Stimulus",
+    "hint": "ask about her medical history and what doctors expect long-term"
+   }
+  ],
+  "b": [
+   {
+    "node": "n5",
+    "label": "Staying awake at night to monitor for threats",
+    "short": "Stays up on watch",
+    "type": "Behaviour",
+    "ntype": "Behavior",
+    "hint": "ask what she does at night instead of sleeping"
+   },
+   {
+    "node": "n21",
+    "label": "nighttime hypervigilance",
+    "short": "Night hypervigilance",
+    "type": "Body",
+    "ntype": "Physiological Sensation",
+    "hint": "ask how her body feels when she lies down at night"
+   }
+  ]
+ },
+ "learning_by_n": {
+  "3": {
+   "point": "In this round, asking patients to explain causes ('why do you think...') opened the widest gap, with 'what do you usually do...' close behind; the combined question about night-time thoughts and 'what would happen if...' kept answers closest.",
+   "model": "claude-opus-5-5"
+  }
+ }
+}

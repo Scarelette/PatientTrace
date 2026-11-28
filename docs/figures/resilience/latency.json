@@ -1,0 +1,11 @@
+{
+ "worker_start_to_up_s": 90.3,
+ "reply_s": 1.22,
+ "reply_plus_analysis_s": 1.23,
+ "scancel_to_gone_s": 12.1,
+ "worker_down_error_s": 0.07,
+ "warming": true,
+ "worker_restart_to_up_s": 436.8,
+ "retry_reply_s": 0.69,
+ "retry_reply_plus_analysis_s": 7.06
+}

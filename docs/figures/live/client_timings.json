@@ -1,0 +1,56 @@
+{
+ "interview": [
+  {
+   "turn": 1,
+   "first_text_s": 0.16,
+   "reply_done_s": 0.53,
+   "analysis_done_s": 7.33
+  },
+  {
+   "turn": 2,
+   "first_text_s": 0.09,
+   "reply_done_s": 0.63,
+   "analysis_done_s": null,
+   "overlapped": true
+  },
+  {
+   "turn": 3,
+   "first_text_s": 0.12,
+   "reply_done_s": 0.51,
+   "analysis_done_s": 11.59
+  },
+  {
+   "turn": 4,
+   "first_text_s": 0.09,
+   "reply_done_s": 0.48,
+   "analysis_done_s": 8.79
+  }
+ ],
+ "fc": [
+  {
+   "turn": 1,
+   "first_text_s": 0.13,
+   "both_replies_s": 0.75,
+   "placed_s": 11.63
+  },
+  {
+   "turn": 2,
+   "first_text_s": 0.09,
+   "both_replies_s": 0.73,
+   "placed_s": 9.71
+  },
+  {
+   "turn": 3,
+   "first_text_s": 0.09,
+   "both_replies_s": 0.41,
+   "placed_s": 8.32
+  },
+  {
+   "turn": 4,
+   "first_text_s": 0.09,
+   "both_replies_s": 0.93,
+   "placed_s": 8.66
+  }
+ ],
+ "fc_finish_s": 6.33
+}

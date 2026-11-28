@@ -1,0 +1,93 @@
+[
+ {
+  "page": "fc",
+  "step": "patient_reply",
+  "n": 8,
+  "ok": 8,
+  "cached": 0,
+  "errors": [],
+  "median_ms": 663,
+  "p90_ms": 698,
+  "max_ms": 890,
+  "first_token_ms_median": 56,
+  "gen_ms_median": 654,
+  "tokens_in_median": 2156,
+  "tokens_out_median": 46,
+  "gpu_util_median": 49,
+  "gpu_mem_mb_median": 121457,
+  "gpu": "NVIDIA H200"
+ },
+ {
+  "page": "fc",
+  "step": "alignment",
+  "n": 4,
+  "ok": 4,
+  "cached": 0,
+  "errors": [],
+  "median_ms": 3513,
+  "p90_ms": 5268,
+  "max_ms": 5268
+ },
+ {
+  "page": "fc",
+  "step": "analysis",
+  "n": 4,
+  "ok": 4,
+  "cached": 0,
+  "errors": [],
+  "median_ms": 5422,
+  "p90_ms": 6300,
+  "max_ms": 6300
+ },
+ {
+  "page": "fc",
+  "step": "learning",
+  "n": 1,
+  "ok": 1,
+  "cached": 0,
+  "errors": [],
+  "median_ms": 4201,
+  "p90_ms": 4201,
+  "max_ms": 4201
+ },
+ {
+  "page": "interview",
+  "step": "patient_reply",
+  "n": 4,
+  "ok": 4,
+  "cached": 0,
+  "errors": [],
+  "median_ms": 453,
+  "p90_ms": 582,
+  "max_ms": 582,
+  "first_token_ms_median": 43,
+  "gen_ms_median": 444,
+  "tokens_in_median": 2288,
+  "tokens_out_median": 32,
+  "gpu_util_median": 48,
+  "gpu_mem_mb_median": 121455,
+  "gpu": "NVIDIA H200"
+ },
+ {
+  "page": "interview",
+  "step": "alignment",
+  "n": 4,
+  "ok": 4,
+  "cached": 0,
+  "errors": [],
+  "median_ms": 3948,
+  "p90_ms": 5732,
+  "max_ms": 5732
+ },
+ {
+  "page": "interview",
+  "step": "guidance",
+  "n": 4,
+  "ok": 4,
+  "cached": 0,
+  "errors": [],
+  "median_ms": 4078,
+  "p90_ms": 5342,
+  "max_ms": 5342
+ }
+]

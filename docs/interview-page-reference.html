@@ -1,0 +1,498 @@
+<title>PatientTrace Interview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: transcript on the left; on the right the live symptom network and the pinned turn explanation */
+:root {
+  --bg:#f5f6f8; --panel:#ffffff; --raise:#f0f2f5; --ink:#16181c; --muted:#5b616b; --line:#dfe3e8; --edge:#c9ced6;
+  --accent:#0a6cdf; --accent-soft:#e4eefc; --trainee:#0a6cdf; --trainee-ink:#ffffff;
+  --t-stim:#d97f00; --t-cog:#0a72dc; --t-emo:#dc2f57; --t-body:#9343d0; --t-beh:#1d9a4a; --ease:#7b8594;
+  --shadow:0 12px 32px rgba(18,28,45,.16);
+  --font:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0d0e11; --panel:#16181c; --raise:#1e2126; --ink:#eef0f3; --muted:#a3a9b3; --line:#2a2e35; --edge:#30353d;
+  --accent:#3d8bff; --accent-soft:#15284a; --trainee:#2a6fdb; --trainee-ink:#ffffff;
+  --t-stim:#ff9f0a; --t-cog:#3d9bff; --t-emo:#ff4d6d; --t-body:#c06bff; --t-beh:#34c759; --ease:#8d96a4;
+  --shadow:0 12px 32px rgba(0,0,0,.55); color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0d0e11; --panel:#16181c; --raise:#1e2126; --ink:#eef0f3; --muted:#a3a9b3; --line:#2a2e35; --edge:#30353d;
+  --accent:#3d8bff; --accent-soft:#15284a; --trainee:#2a6fdb; --trainee-ink:#ffffff;
+  --t-stim:#ff9f0a; --t-cog:#3d9bff; --t-emo:#ff4d6d; --t-body:#c06bff; --t-beh:#34c759; --ease:#8d96a4;
+  --shadow:0 12px 32px rgba(0,0,0,.55); color-scheme:dark; }
+
+html, body { height:100%; }
+body { background:var(--bg); color:var(--ink); font:14px/1.5 var(--font); }
+button { font:inherit; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:6px 14px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+button:hover:not(:disabled) { border-color:var(--accent); }
+button:focus-visible, .msg.p .bubble:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+button:disabled { opacity:.5; cursor:default; }
+
+.app { height:100%; display:flex; flex-direction:column; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:12px; gap:12px; box-sizing:border-box; }
+.top { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.avatar { width:36px; height:36px; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-weight:650; }
+.who { display:flex; align-items:center; gap:10px; margin-right:auto; min-width:0; }
+.name { font-weight:650; font-size:15px; }
+.name .meta, .sub { color:var(--muted); font-weight:400; font-size:12.5px; }
+.cov { color:var(--muted); font-size:12.5px; font-variant-numeric:tabular-nums; }
+
+.grid { flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,560px); gap:12px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:14px; }
+.chat { display:flex; flex-direction:column; min-height:0; }
+#log { list-style:none; margin:0; padding:16px; overflow:auto; flex:1; display:flex; flex-direction:column; gap:14px; scroll-behavior:smooth; }
+.composer { display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--line); }
+.composer input { flex:1; min-width:0; font:inherit; color:var(--muted); background:var(--raise); border:1px solid var(--line); border-radius:999px; padding:8px 14px; }
+
+.msg { display:flex; flex-direction:column; max-width:78%; animation:rise .32s ease both; }
+.msg.t { align-self:flex-end; align-items:flex-end; }
+.msg.p { align-self:flex-start; }
+.who-l { font-size:11.5px; color:var(--muted); margin:0 6px 3px; letter-spacing:.02em; }
+.bubble { padding:10px 14px; border-radius:16px; line-height:1.55; }
+.msg.t .bubble { background:var(--trainee); color:var(--trainee-ink); border-bottom-right-radius:5px; }
+.msg.p .bubble { background:var(--panel); border:1px solid var(--line); border-bottom-left-radius:5px; cursor:pointer; transition:border-color .15s, box-shadow .15s; }
+.msg.p .bubble:hover, .msg.p.pinned .bubble { border-color:var(--accent); }
+.msg.p.pinned .bubble { box-shadow:0 0 0 3px var(--accent-soft); }
+.trig-word { text-decoration:underline dotted 1.5px; text-underline-offset:3px; }
+.sp { background:transparent; color:inherit; text-decoration:underline 2px var(--c); text-underline-offset:4px; border-radius:3px; transition:background .2s; }
+.sp.ez { text-decoration-style:dashed; }
+.msg.p:hover .sp, .msg.p.pinned .sp { background:color-mix(in srgb, var(--c) 16%, transparent); }
+.dots { display:flex; gap:4px; margin:6px 6px 0; flex-wrap:wrap; align-items:center; }
+.dots i { width:7px; height:7px; border-radius:50%; background:var(--c); }
+.dots .tag { font-size:11px; color:var(--muted); margin-left:4px; }
+.dots .tag.loop { color:var(--accent); }
+.typing .bubble { display:flex; gap:4px; padding:14px; }
+.typing .bubble i { width:6px; height:6px; border-radius:50%; background:var(--muted); animation:blink 1s infinite; }
+.typing .bubble i:nth-child(2) { animation-delay:.15s; } .typing .bubble i:nth-child(3) { animation-delay:.3s; }
+
+.side { display:flex; flex-direction:column; gap:12px; min-height:0; overflow:auto; }
+.card-h { display:flex; align-items:baseline; gap:8px; padding:12px 16px 0; flex-wrap:wrap; }
+.card-h h2 { font-size:13px; margin:0; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+.cap { font-size:12.5px; color:var(--muted); margin-left:auto; }
+.cap b { color:var(--accent); font-weight:600; }
+.svgwrap { overflow-x:auto; padding:0 8px; }
+#net { display:block; width:100%; min-width:460px; height:auto; }
+.colh { font-size:10.5px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; }
+.e { fill:none; stroke:var(--edge); stroke-width:1; opacity:.55; }
+.fx { fill:none; stroke-width:2.2; stroke-linecap:round; }
+.fx.flow { stroke-dasharray:6 5; animation:flow .9s linear infinite; }
+.nd .dot { stroke:var(--panel); stroke-width:1.5; fill-opacity:.28; transition:fill-opacity .3s, r .3s; }
+.nd .lb { font-size:10.5px; fill:var(--muted); text-anchor:middle; transition:fill .3s; }
+.nd .halo { fill:none; stroke-width:2; opacity:0; transform-box:fill-box; transform-origin:center; }
+.nd.seen .dot { fill-opacity:.7; }
+.nd.on .dot { fill-opacity:1; r:7; }
+.nd.on .lb { fill:var(--ink); font-weight:650; }
+.nd.on .halo { animation:pulse 1.6s ease-out infinite; }
+.nd.ez .dot { fill-opacity:0; stroke:var(--ease); stroke-dasharray:2 2; r:7; }
+.nd.ez .lb { fill:var(--ease); font-style:italic; }
+.nd.hl .dot { r:9; fill-opacity:1; }
+.nd.hl .lb { fill:var(--ink); font-weight:650; }
+.legend { display:flex; gap:12px; flex-wrap:wrap; padding:4px 16px 10px; font-size:11.5px; color:var(--muted); }
+.legend span { display:inline-flex; align-items:center; gap:5px; }
+.legend i { width:8px; height:8px; border-radius:50%; background:var(--c); }
+.legend i.ring { background:none; border:1.5px dashed var(--ease); }
+.unexp { padding:0 16px 12px; font-size:12.5px; color:var(--muted); }
+.unexp b { color:var(--ink); font-weight:600; }
+
+#detail { padding:14px 16px 16px; display:flex; flex-direction:column; gap:12px; }
+#detail.swap { animation:rise .3s ease both; }
+.eyebrow { font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+#detail h3 { margin:2px 0 0; font-size:17px; text-wrap:balance; }
+#detail h4, .pop h4 { margin:0 0 4px; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+#detail p { margin:0; }
+.chip { display:inline-flex; align-items:center; gap:5px; padding:2px 9px 2px 7px; border-radius:999px; font-size:12px; font-weight:600; background:color-mix(in srgb, var(--c) 14%, transparent); color:var(--ink); white-space:nowrap; }
+.chip i { width:7px; height:7px; border-radius:50%; background:var(--c); }
+.chip.ez { background:transparent; border:1px dashed var(--ease); color:var(--ease); }
+.trig { display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:13px; }
+.trig q { font-style:italic; }
+.chain { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0; }
+.chain li { display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; align-items:start; padding:6px 0; position:relative; }
+.chain li + li::before { content:""; position:absolute; left:10px; top:-6px; height:12px; border-left:1.5px solid var(--line); }
+.chain .q { color:var(--muted); font-size:13px; padding-top:1px; }
+.chain .q em { color:var(--ink); }
+.two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.two > div { background:var(--raise); border-radius:10px; padding:10px 12px; min-width:0; }
+.ev { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; font-size:12.5px; }
+.ev li { color:var(--muted); }
+.ev .arr { color:var(--ink); font-weight:600; }
+.tip { border-left:3px solid var(--accent); background:var(--accent-soft); border-radius:0 10px 10px 0; padding:10px 12px; display:flex; flex-direction:column; gap:6px; }
+.tip .try { font-size:13px; }
+.nav { display:flex; gap:8px; flex-wrap:wrap; }
+.loopnote { font-size:12.5px; color:var(--accent); font-weight:600; }
+
+.pop { position:fixed; z-index:20; width:340px; max-width:calc(100vw - 24px); background:var(--panel); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); padding:12px 14px; pointer-events:none; display:flex; flex-direction:column; gap:10px; animation:popin .16s ease both; font-size:13px; }
+.pop .ttl { font-weight:650; font-size:14px; }
+.pop .row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+.pop .two > div { padding:8px 10px; }
+.pop .foot { font-size:11.5px; color:var(--muted); }
+
+@keyframes rise { from { opacity:0; transform:translateY(8px); } }
+@keyframes popin { from { opacity:0; transform:translateY(4px) scale(.98); } }
+@keyframes blink { 50% { opacity:.25; } }
+@keyframes pulse { 0% { opacity:.7; transform:scale(.7); } 100% { opacity:0; transform:scale(2); } }
+@keyframes flow { to { stroke-dashoffset:-22; } }
+@media (prefers-reduced-motion: reduce) { *, *::before { animation:none !important; transition:none !important; } }
+
+@media (max-width: 900px) {
+  html, body { height:auto; }
+  .app { height:auto; }
+  .grid { grid-template-columns:minmax(0,1fr); }
+  #log { max-height:none; }
+  .msg { max-width:92%; }
+  .side { overflow:visible; }
+  .two { grid-template-columns:1fr; }
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="who"><div class="avatar" aria-hidden="true">E</div>
+      <div><div class="name">Emily <span class="meta">27 · simulated patient</span></div>
+      <div class="sub">Example session · congenital heart condition, health anxiety. Not a real person.</div></div></div>
+    <span class="cov" id="cov"></span>
+    <button id="play" type="button"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 0.5v9l8-4.5z" fill="currentColor"/></svg><span>Replay session</span></button>
+  </header>
+  <main class="grid">
+    <section class="card chat" aria-label="Interview transcript">
+      <ol id="log"></ol>
+      <div class="composer"><input id="draft" placeholder="Live chat is off in this example. Hover or click a patient reply to see what's happening." disabled><button type="button" disabled>Send</button></div>
+    </section>
+    <aside class="side">
+      <div class="card">
+        <div class="card-h"><h2>Symptom network</h2><span class="cap" id="netcap"></span></div>
+        <div class="svgwrap"><svg id="net" viewBox="0 0 560 340" role="img" aria-label="Emily's symptom network; nodes expressed in the selected reply are lit"></svg></div>
+        <div class="legend" id="legend"></div>
+        <div class="unexp" id="unexp"></div>
+      </div>
+      <div class="card" id="detail" aria-live="polite"></div>
+    </aside>
+  </main>
+</div>
+<div id="pop" class="pop" hidden></div>
+
+<script>
+const NET = {"nodes":[{"name":"Skipping medical appointments when possible","type":"Behavior"},{"name":"Changing the subject when health topics arise","type":"Behavior"},{"name":"Avoiding hospital environments, resulting in delayed care","type":"Behavior"},{"name":"Frequently checking heart rate via smartphone","type":"Behavior"},{"name":"Excessive online symptom-searching for reassurance","type":"Behavior"},{"name":"Social withdrawal to avoid medical-related discussions","type":"Behavior"},{"name":"Withdrawing into silence when distressed","type":"Behavior"},{"name":"Deflecting distress with dry humor","type":"Behavior"},{"name":"Avoiding disclosure of childhood trauma","type":"Behavior"},{"name":"anticipatory anxiety","type":"Emotion"},{"name":"emotional numbness","type":"Emotion"},{"name":"fear of appearing weak","type":"Emotion"},{"name":"shame about past hospitalizations","type":"Emotion"},{"name":"fear of being judged as overreacting","type":"Emotion"},{"name":"panic","type":"Emotion"},{"name":"Episodic fast heartbeat (tachycardia)","type":"Physiological Sensation"},{"name":"Panic-like bodily sensations","type":"Physiological Sensation"},{"name":"Insomnia with frequent nighttime awakenings","type":"Physiological Sensation"},{"name":"Chronic fatigue","type":"Physiological Sensation"},{"name":"Medical settings are inherently threatening","type":"Cognition"},{"name":"My body is unreliable and unpredictable","type":"Cognition"},{"name":"This chest tightness means my heart is failing again","type":"Cognition"},{"name":"They'll ask me to undergo another surgery soon","type":"Cognition"},{"name":"No one will understand how scared I am","type":"Cognition"},{"name":"What if I can't work anymore due to health complications?","type":"Cognition"},{"name":"Will my heart ever be 'normal'?","type":"Cognition"},{"name":"What if I have to be sedated again and can't wake up?","type":"Cognition"},{"name":"Medical professionals are unsympathetic","type":"Cognition"},{"name":"Medical appointments","type":"Stimulus"},{"name":"Health-related conversations","type":"Stimulus"},{"name":"Mentions of surgery, anesthesia, or diagnostic tests","type":"Stimulus"},{"name":"Hospital environments","type":"Stimulus"},{"name":"Childhood traumatic medical experiences (early hospitalizations)","type":"Stimulus"},{"name":"Chronic congenital heart condition with uncertain prognosis","type":"Stimulus"},{"name":"Geographical distance from specialty care and social contacts","type":"Stimulus"}],"edges":[{"from":"Skipping medical appointments when possible","to":"anticipatory anxiety","evidence":"Avoidance of medical topics listed as maintaining factor; skipping appointments preserves anticipatory anxiety"},{"from":"Skipping medical appointments when possible","to":"Medical settings are inherently threatening","evidence":"Avoiding appointments prevents disconfirmation of 'medical settings are threatening'"},{"from":"Avoiding hospital environments, resulting in delayed care","to":"Medical settings are inherently threatening","evidence":"Avoidance of hospital environments maintains guarded, cautious view of healthcare"},{"from":"Avoiding hospital environments, resulting in delayed care","to":"anticipatory anxiety","evidence":"Avoidance of medical discussions and hospital environments listed as maintaining factor for anxiety"},{"from":"Frequently checking heart rate via smartphone","to":"anticipatory anxiety","evidence":"Overreliance on symptom-checking listed as maintaining factor for anxiety"},{"from":"Excessive online symptom-searching for reassurance","to":"anticipatory anxiety","evidence":"Overreliance on online symptom-checking maintains persistent preoccupation and anxiety"},{"from":"Excessive online symptom-searching for reassurance","to":"This chest tightness means my heart is failing again","evidence":"Excessive online research about symptoms sustains catastrophic heart interpretations"},{"from":"Excessive online symptom-searching for reassurance","to":"Insomnia with frequent nighttime awakenings","evidence":"Insomnia with racing thoughts about health follows excessive symptom research"},{"from":"Excessive online symptom-searching for reassurance","to":"My body is unreliable and unpredictable","evidence":"Persistent preoccupation with potential heart complications maintained by searching"},{"from":"Social withdrawal to avoid medical-related discussions","to":"No one will understand how scared I am","evidence":"Few close friends due to social withdrawal; feels disconnected, 'no one will understand'"},{"from":"Withdrawing into silence when distressed","to":"No one will understand how scared I am","evidence":"Withdraws into silence when distressed, blocking others from understanding her fear"},{"from":"Avoiding disclosure of childhood trauma","to":"anticipatory anxiety","evidence":"Unaddressed childhood trauma from hospital experiences listed as maintaining factor"},{"from":"Avoiding disclosure of childhood trauma","to":"No one will understand how scared I am","evidence":"Guarded, avoids disclosure; discontinued therapy after feeling misunderstood"},{"from":"Changing the subject when health topics arise","to":"anticipatory anxiety","evidence":"Changing the subject on health topics maintains avoidance-driven anticipatory anxiety"},{"from":"anticipatory anxiety","to":"Episodic fast heartbeat (tachycardia)","evidence":"Episodic tachycardia especially when contemplating medical scenarios"},{"from":"anticipatory anxiety","to":"Panic-like bodily sensations","evidence":"panic-like sensations when contemplating medical scenarios"},{"from":"anticipatory anxiety","to":"Insomnia with frequent nighttime awakenings","evidence":"Insomnia characterized by racing thoughts about health and medical procedures"},{"from":"anticipatory anxiety","to":"Excessive online symptom-searching for reassurance","evidence":"Persistent preoccupation with potential heart complications leading to excessive online research"},{"from":"anticipatory anxiety","to":"Skipping medical appointments when possible","evidence":"Avoidance of medical discussions... resulting in delayed care"},{"from":"anticipatory anxiety","to":"Avoiding hospital environments, resulting in delayed care","evidence":"Avoidance of hospital environments, often resulting in delayed care"},{"from":"anticipatory anxiety","to":"panic","evidence":"panic-like sensations escalate during medical reminders and anticipated medical scenarios"},{"from":"anticipatory anxiety","to":"Chronic fatigue","evidence":"Chronic fatigue from emotional exhaustion and disrupted sleep patterns"},{"from":"panic","to":"Episodic fast heartbeat (tachycardia)","evidence":"Episodic fast heartbeat accompanied by panic-like sensations"},{"from":"fear of appearing weak","to":"Withdrawing into silence when distressed","evidence":"Withdraws into silence when distressed; fears being judged"},{"from":"fear of appearing weak","to":"Deflecting distress with dry humor","evidence":"deflects with dry humor when distressed rather than showing vulnerability"},{"from":"fear of being judged as overreacting","to":"Changing the subject when health topics arise","evidence":"fears being judged for her health concerns; changes subject on health topics"},{"from":"fear of being judged as overreacting","to":"Social withdrawal to avoid medical-related discussions","evidence":"Social withdrawal to avoid medical-related discussions; fears being judged for health concerns"},{"from":"fear of being judged as overreacting","to":"No one will understand how scared I am","evidence":"feels disconnected from others in support groups; felt misunderstood in therapy"},{"from":"fear of being judged as overreacting","to":"Excessive online symptom-searching for reassurance","evidence":"seeks reassurance online rather than risking being judged as overreacting by professionals"},{"from":"Episodic fast heartbeat (tachycardia)","to":"Panic-like bodily sensations","evidence":"Episodic tachycardia accompanied by panic-like sensations"},{"from":"Episodic fast heartbeat (tachycardia)","to":"Frequently checking heart rate via smartphone","evidence":"Frequently checking heart rate via smartphone in response to fast heartbeat episodes"},{"from":"Episodic fast heartbeat (tachycardia)","to":"This chest tightness means my heart is failing again","evidence":"Episodes interpreted as heart complications: 'chest tightness means my heart is failing again'"},{"from":"Episodic fast heartbeat (tachycardia)","to":"Excessive online symptom-searching for reassurance","evidence":"Preoccupation with heart complications leading to excessive online research about symptoms"},{"from":"Episodic fast heartbeat (tachycardia)","to":"My body is unreliable and unpredictable","evidence":"Unpredictable fast heartbeat episodes 3-5 times weekly reinforce belief body is unreliable"},{"from":"Panic-like bodily sensations","to":"panic","evidence":"Panic-like sensations especially when contemplating medical scenarios escalate into panic"},{"from":"Panic-like bodily sensations","to":"Excessive online symptom-searching for reassurance","evidence":"Overreliance on online symptom-checking as reassurance for bodily sensations"},{"from":"Panic-like bodily sensations","to":"My body is unreliable and unpredictable","evidence":"Panic-like bodily sensations feed belief 'my body is unreliable and unpredictable'"},{"from":"Insomnia with frequent nighttime awakenings","to":"Chronic fatigue","evidence":"Chronic fatigue from emotional exhaustion and disrupted sleep patterns"},{"from":"Medical settings are inherently threatening","to":"Avoiding hospital environments, resulting in delayed care","evidence":"Avoidance of hospital environments, often resulting in delayed care"},{"from":"Medical settings are inherently threatening","to":"anticipatory anxiety","evidence":"escalation after routine check-up; anxiety when contemplating medical scenarios"},{"from":"My body is unreliable and unpredictable","to":"Excessive online symptom-searching for reassurance","evidence":"persistent preoccupation with heart complications leading to excessive online research"},{"from":"This chest tightness means my heart is failing again","to":"panic","evidence":"panic-like sensations especially when contemplating medical scenarios"},{"from":"This chest tightness means my heart is failing again","to":"Panic-like bodily sensations","evidence":"episodic tachycardia accompanied by panic-like sensations"},{"from":"This chest tightness means my heart is failing again","to":"Episodic fast heartbeat (tachycardia)","evidence":"fast heartbeat episodes with intensity increasing during medical reminders"},{"from":"This chest tightness means my heart is failing again","to":"Excessive online symptom-searching for reassurance","evidence":"excessive online research about symptoms for reassurance"},{"from":"They'll ask me to undergo another surgery soon","to":"anticipatory anxiety","evidence":"escalation after check-up where concerns were noted; racing thoughts about medical procedures"},{"from":"No one will understand how scared I am","to":"Withdrawing into silence when distressed","evidence":"withdraws into silence when distressed; felt misunderstood in therapy"},{"from":"No one will understand how scared I am","to":"Social withdrawal to avoid medical-related discussions","evidence":"few close friends due to social withdrawal; feels disconnected from support groups"},{"from":"No one will understand how scared I am","to":"Avoiding disclosure of childhood trauma","evidence":"resists emotional intimacy; guarded about deeper fears and past trauma"},{"from":"Will my heart ever be 'normal'?","to":"Excessive online symptom-searching for reassurance","evidence":"seeks reassurance; excessive online research about symptoms"},{"from":"Will my heart ever be 'normal'?","to":"Insomnia with frequent nighttime awakenings","evidence":"racing thoughts about health with difficulty initiating sleep"},{"from":"What if I have to be sedated again and can't wake up?","to":"Avoiding hospital environments, resulting in delayed care","evidence":"fear of losing control during procedures maintains avoidance of hospital environments"},{"from":"What if I have to be sedated again and can't wake up?","to":"panic","evidence":"panic-like sensations when contemplating medical scenarios like sedation"},{"from":"What if I have to be sedated again and can't wake up?","to":"Insomnia with frequent nighttime awakenings","evidence":"insomnia with racing thoughts about medical procedures"},{"from":"Medical professionals are unsympathetic","to":"Skipping medical appointments when possible","evidence":"discontinued therapy after feeling misunderstood; skips appointments"},{"from":"Medical professionals are unsympathetic","to":"fear of being judged as overreacting","evidence":"fears being judged for her health concerns"},{"from":"Medical appointments","to":"anticipatory anxiety","evidence":"escalation after a routine check-up where concerns were noted"},{"from":"Medical appointments","to":"Skipping medical appointments when possible","evidence":"skipping medical appointments; avoidance of medical topics maintains symptoms"},{"from":"Medical appointments","to":"Episodic fast heartbeat (tachycardia)","evidence":"fast heartbeat episodes intensify during medical reminders"},{"from":"Medical appointments","to":"They'll ask me to undergo another surgery soon","evidence":"check-up where concerns were noted; fears another surgery"},{"from":"Health-related conversations","to":"Changing the subject when health topics arise","evidence":"changing the subject when health topics arise"},{"from":"Health-related conversations","to":"Social withdrawal to avoid medical-related discussions","evidence":"social withdrawal to avoid medical-related discussions"},{"from":"Health-related conversations","to":"anticipatory anxiety","evidence":"avoidance of medical discussions; anxiety around medical reminders"},{"from":"Mentions of surgery, anesthesia, or diagnostic tests","to":"What if I have to be sedated again and can't wake up?","evidence":"fear of losing control during procedures; sedation fear"},{"from":"Mentions of surgery, anesthesia, or diagnostic tests","to":"Panic-like bodily sensations","evidence":"panic-like sensations especially when contemplating medical scenarios"},{"from":"Mentions of surgery, anesthesia, or diagnostic tests","to":"panic","evidence":"panic-like sensations triggered by medical scenarios"},{"from":"Mentions of surgery, anesthesia, or diagnostic tests","to":"Insomnia with frequent nighttime awakenings","evidence":"insomnia with racing thoughts about medical procedures"},{"from":"Hospital environments","to":"Avoiding hospital environments, resulting in delayed care","evidence":"avoidance of hospital environments, often resulting in delayed care"},{"from":"Hospital environments","to":"panic","evidence":"PTSD-related symptoms tied to hospital experiences"},{"from":"Hospital environments","to":"Medical settings are inherently threatening","evidence":"cautious, guarded approach to healthcare; hospitals as threat"},{"from":"Childhood traumatic medical experiences (early hospitalizations)","to":"Medical settings are inherently threatening","evidence":"early hospitalizations marked by isolation shaped cautious approach to healthcare"},{"from":"Childhood traumatic medical experiences (early hospitalizations)","to":"Avoiding disclosure of childhood trauma","evidence":"avoiding disclosure; deeper fears related to past trauma require trust-building"},{"from":"Childhood traumatic medical experiences (early hospitalizations)","to":"No one will understand how scared I am","evidence":"hospitalizations marked by isolation and lack of emotional support; felt misunderstood"},{"from":"Childhood traumatic medical experiences (early hospitalizations)","to":"Medical professionals are unsympathetic","evidence":"early hospitalizations lacked emotional support"},{"from":"Childhood traumatic medical experiences (early hospitalizations)","to":"What if I have to be sedated again and can't wake up?","evidence":"multiple cardiac surgeries by age 10; fear of sedation and losing control"},{"from":"Chronic congenital heart condition with uncertain prognosis","to":"My body is unreliable and unpredictable","evidence":"congenital heart condition with uncertain prognosis; body unpredictable"},{"from":"Chronic congenital heart condition with uncertain prognosis","to":"This chest tightness means my heart is failing again","evidence":"persistent preoccupation with potential heart complications"},{"from":"Chronic congenital heart condition with uncertain prognosis","to":"Will my heart ever be 'normal'?","evidence":"uncertain prognosis; will my heart ever be normal"},{"from":"Chronic congenital heart condition with uncertain prognosis","to":"Excessive online symptom-searching for reassurance","evidence":"excessive online research about symptoms; overreliance on online symptom-checking"},{"from":"Chronic congenital heart condition with uncertain prognosis","to":"Insomnia with frequent nighttime awakenings","evidence":"insomnia characterized by racing thoughts about health"}],"groups":[{"label":"Avoidance Behaviors","type":"Behavior","members":["Skipping medical appointments when possible","Changing the subject when health topics arise","Avoiding hospital environments, resulting in delayed care","Social withdrawal to avoid medical-related discussions","Avoiding disclosure of childhood trauma"]},{"label":"Health Anxiety Behaviors","type":"Behavior","members":["Frequently checking heart rate via smartphone","Excessive online symptom-searching for reassurance"]},{"label":"Distress Coping Behaviors","type":"Behavior","members":["Withdrawing into silence when distressed","Deflecting distress with dry humor"]},{"label":"Anticipatory Anxiety","type":"Emotion","members":["anticipatory anxiety","panic"]},{"label":"Emotional Suppression","type":"Emotion","members":["emotional numbness","fear of appearing weak","shame about past hospitalizations","fear of being judged as overreacting"]},{"label":"Physiological Distress","type":"Physiological Sensation","members":["Episodic fast heartbeat (tachycardia)","Panic-like bodily sensations","Insomnia with frequent nighttime awakenings","Chronic fatigue"]},{"label":"Threat Perceptions","type":"Cognition","members":["Medical settings are inherently threatening","My body is unreliable and unpredictable","This chest tightness means my heart is failing again"]},{"label":"Future Uncertainty","type":"Cognition","members":["They'll ask me to undergo another surgery soon","What if I can't work anymore due to health complications?","Will my heart ever be 'normal'?","What if I have to be sedated again and can't wake up?"]},{"label":"Interpersonal Mistrust","type":"Cognition","members":["No one will understand how scared I am","Medical professionals are unsympathetic"]},{"label":"Medical Triggers","type":"Stimulus","members":["Medical appointments","Health-related conversations","Mentions of surgery, anesthesia, or diagnostic tests","Hospital environments"]},{"label":"Traumatic Memories","type":"Stimulus","members":["Childhood traumatic medical experiences (early hospitalizations)"]},{"label":"Chronic Illness Impact","type":"Stimulus","members":["Chronic congenital heart condition with uncertain prognosis"]},{"label":"Access Barriers","type":"Stimulus","members":["Geographical distance from specialty care and social contacts"]}]};
+const TYPES = [
+  { t: "Stimulus", v: "--t-stim", lab: "Stimulus" },
+  { t: "Cognition", v: "--t-cog", lab: "Cognition" },
+  { t: "Emotion", v: "--t-emo", lab: "Emotion" },
+  { t: "Physiological Sensation", v: "--t-body", lab: "Body" },
+  { t: "Behavior", v: "--t-beh", lab: "Behavior" },
+];
+const COL = Object.fromEntries(TYPES.map((x, i) => [x.t, i]));
+const SHORT = {
+  "Medical appointments": "Appointments", "Health-related conversations": "Health talk",
+  "Mentions of surgery, anesthesia, or diagnostic tests": "Surgery mentions", "Hospital environments": "Hospitals",
+  "Childhood traumatic medical experiences (early hospitalizations)": "Childhood surgeries",
+  "Chronic congenital heart condition with uncertain prognosis": "Heart condition",
+  "Geographical distance from specialty care and social contacts": "Distance from care",
+  "Medical settings are inherently threatening": "Medicine = threat", "My body is unreliable and unpredictable": "Body unreliable",
+  "This chest tightness means my heart is failing again": "“Heart failing”", "They'll ask me to undergo another surgery soon": "“More surgery”",
+  "No one will understand how scared I am": "“No one gets it”", "What if I can't work anymore due to health complications?": "“Can't work”",
+  "Will my heart ever be 'normal'?": "“Ever normal?”", "What if I have to be sedated again and can't wake up?": "“Won't wake up”",
+  "Medical professionals are unsympathetic": "Doctors don't care",
+  "anticipatory anxiety": "Anxiety", "emotional numbness": "Numbness", "fear of appearing weak": "Fear of seeming weak",
+  "shame about past hospitalizations": "Shame", "fear of being judged as overreacting": "Fear of judgment", "panic": "Panic",
+  "Episodic fast heartbeat (tachycardia)": "Racing heart", "Panic-like bodily sensations": "Panic sensations",
+  "Insomnia with frequent nighttime awakenings": "Insomnia", "Chronic fatigue": "Fatigue",
+  "Skipping medical appointments when possible": "Skips appointments", "Changing the subject when health topics arise": "Changes subject",
+  "Avoiding hospital environments, resulting in delayed care": "Avoids hospitals", "Frequently checking heart rate via smartphone": "Checks heart rate",
+  "Excessive online symptom-searching for reassurance": "Symptom googling", "Social withdrawal to avoid medical-related discussions": "Withdraws socially",
+  "Withdrawing into silence when distressed": "Goes silent", "Deflecting distress with dry humor": "Dry humor",
+  "Avoiding disclosure of childhood trauma": "Hides trauma",
+};
+const TYPE_OF = Object.fromEntries(NET.nodes.map(n => [n.name, n.type]));
+const EVID = Object.fromEntries(NET.edges.map(e => [e.from + "→" + e.to, e.evidence]));
+const cvar = n => TYPES[COL[TYPE_OF[n]]].v;
+const short = n => SHORT[n] || n;
+
+// ---- the example session: each patient turn says which nodes it expresses, and how ----
+const N = {
+  appt: "Medical appointments", talk: "Health-related conversations", surg: "Mentions of surgery, anesthesia, or diagnostic tests",
+  child: "Childhood traumatic medical experiences (early hospitalizations)", heart: "Chronic congenital heart condition with uncertain prognosis",
+  failing: "This chest tightness means my heart is failing again", more: "They'll ask me to undergo another surgery soon",
+  body: "My body is unreliable and unpredictable", noone: "No one will understand how scared I am",
+  anx: "anticipatory anxiety", panic: "panic", weak: "fear of appearing weak", judged: "fear of being judged as overreacting",
+  tachy: "Episodic fast heartbeat (tachycardia)", insom: "Insomnia with frequent nighttime awakenings", fatigue: "Chronic fatigue",
+  check: "Frequently checking heart rate via smartphone", google: "Excessive online symptom-searching for reassurance",
+  silent: "Withdrawing into silence when distressed", social: "Social withdrawal to avoid medical-related discussions",
+  humor: "Deflecting distress with dry humor", hide: "Avoiding disclosure of childhood trauma", subject: "Changing the subject when health topics arise",
+};
+const TURNS = [
+  { who: "t", text: "Hi Emily, thanks for coming in. What brings you here today?" },
+  { who: "p", title: "Minimizing at the door",
+    text: "Honestly? My cardiologist kind of insisted. I get these episodes where my heart just takes off… it's probably nothing. I'm sure you see people way worse off than me.",
+    spans: [["My cardiologist kind of insisted", N.appt], ["my heart just takes off", N.tachy], ["it's probably nothing", N.judged], ["way worse off than me", N.judged]],
+    trigger: { phrase: "What brings you here", node: N.talk },
+    active: [N.talk, N.appt, N.tachy, N.judged], path: [[N.appt, N.tachy]],
+    surface: "Polite and a little brushing-off. The visit is framed as someone else's idea.",
+    under: "She expects to be seen as overreacting, so she makes the problem small before you can.",
+    tip: "Early minimizing protects her; it doesn't mean the problem is small. Normalize the visit, and don't agree that it's “probably nothing”.",
+    instead: "Lots of people come in because someone nudged them. I'd like to hear what these episodes are like for you." },
+  { who: "t", text: "That sounds unsettling. What happens when your heart takes off?" },
+  { who: "p", title: "The checking loop",
+    text: "It just goes. 140, 150. I check my watch, then my phone, and then I'm on some forum at 2 a.m. reading about arrhythmias. Which, spoiler, never helps.",
+    spans: [["It just goes. 140, 150", N.tachy], ["I check my watch, then my phone", N.check], ["on some forum at 2 a.m. reading about arrhythmias", N.google], ["spoiler, never helps", N.humor]],
+    active: [N.tachy, N.check, N.google, N.anx, N.insom, N.humor],
+    path: [[N.tachy, N.check], [N.tachy, N.google], [N.google, N.anx], [N.anx, N.tachy], [N.google, N.insom]],
+    surface: "A quick, wry account of checking and searching.",
+    under: "Each check brings brief relief, then more worry, which speeds her heart up again. The joke keeps you from seeing how scared she is.",
+    tip: "This is a maintaining loop: reassurance-seeking keeps the anxiety going. Ask what happens after she searches instead of offering reassurance yourself.",
+    instead: "When you read those forums at 2 a.m., how do you feel afterwards?" },
+  { who: "t", text: "What goes through your mind in those moments?" },
+  { who: "p", title: "Reading the body as danger",
+    text: "That this is it. That the repair is failing and they'll put me back on the table. My body's never exactly been reliable.",
+    spans: [["That this is it", N.panic], ["the repair is failing", N.failing], ["they'll put me back on the table", N.more], ["My body's never exactly been reliable", N.body]],
+    active: [N.heart, N.tachy, N.failing, N.more, N.body, N.panic, N.anx],
+    path: [[N.heart, N.failing], [N.tachy, N.failing], [N.failing, N.tachy], [N.failing, N.panic], [N.tachy, N.body], [N.more, N.anx]],
+    surface: "Matter-of-fact, almost flat.",
+    under: "A racing heart is read as proof that her heart is failing, and the thought of more surgery feeds the anxiety. Given her history, the fear makes sense.",
+    tip: "Reflect the meaning before challenging it. Her body has let her down before, so validate first, then explore how often the episodes have actually meant danger.",
+    instead: "Given everything your heart has been through, it makes sense your mind goes there fast." },
+  { who: "t", text: "You mentioned the table. You've had surgeries before?", trig: "surgeries" },
+  { who: "p", title: "The door closes",
+    text: "A few. When I was a kid. I don't really remember much. Can we talk about the sleep thing instead?",
+    spans: [["A few. When I was a kid", N.child], ["I don't really remember much", N.hide], ["Can we talk about the sleep thing instead?", N.subject]],
+    trigger: { phrase: "surgeries", node: N.surg },
+    active: [N.surg, N.talk, N.child, N.hide, N.subject], path: [[N.child, N.hide], [N.talk, N.subject]],
+    surface: "Short answers, then a clear request to change the topic.",
+    under: "The question touched her childhood hospital stays. Steering away protects her from feelings she isn't ready to share with someone new.",
+    tip: "This avoidance is a boundary, not resistance. Follow her lead and signal you can return to it later; trust comes before trauma history.",
+    instead: "Of course. We can come back to that whenever you want, or not at all. Tell me about sleep." },
+  { who: "t", text: "Of course. We can come back to it whenever you're ready. Tell me about sleep." },
+  { who: "p", title: "Nights on watch",
+    text: "I lie there listening to my heartbeat. If I drift off and something happens, who'd even notice? So I'm basically a zombie all day.",
+    spans: [["I lie there listening to my heartbeat", N.insom], ["If I drift off and something happens", N.anx], ["basically a zombie all day", N.fatigue]],
+    active: [N.anx, N.insom, N.fatigue], path: [[N.anx, N.insom], [N.insom, N.fatigue], [N.anx, N.fatigue]],
+    surface: "Tired, with a joke at the end.",
+    under: "Bedtime turns into monitoring. Fear that something will happen unnoticed keeps her awake, and the lost sleep wears her down during the day.",
+    tip: "Sleep is a safe topic she chose herself. Explore it concretely (when, how long, what she does) to build rapport and map the anxiety.",
+    instead: "What do you usually do when you notice your heartbeat at night?" },
+  { who: "t", text: "That sounds lonely, carrying that every night. Does anyone know how hard this has been?", trig: "Does anyone know" },
+  { who: "p", title: "Keeping it to herself",
+    text: "Not really. People either freak out or tell me I'm being dramatic. Easier to keep it to myself. I'm a great dinner guest, as you can tell.",
+    spans: [["People either freak out or tell me I'm being dramatic", N.judged], ["Easier to keep it to myself", N.silent], ["I'm a great dinner guest, as you can tell", N.humor]],
+    trigger: { phrase: "Does anyone know", node: N.talk },
+    active: [N.talk, N.judged, N.noone, N.silent, N.social, N.weak, N.humor],
+    path: [[N.judged, N.noone], [N.noone, N.silent], [N.silent, N.noone], [N.noone, N.social], [N.weak, N.humor]],
+    surface: "Dismissive, then a self-deprecating joke.",
+    under: "She expects to be judged, so she stays quiet, which confirms that no one understands. The joke covers a fear of looking weak.",
+    tip: "Another maintaining loop, this time a social one. Gently name the feeling under the joke; you can be the person who reacts with neither alarm nor dismissal.",
+    instead: "It sounds like you've learned that telling people costs you something." },
+  { who: "t", text: "I don't think you're being dramatic. Your heart has given you real reasons to be scared." },
+  { who: "p", title: "A small opening",
+    text: "…Yeah. Thanks. I don't hear that a lot.",
+    spans: [["I don't hear that a lot", N.noone, true]],
+    active: [], eased: [N.noone, N.judged], path: [],
+    surface: "A pause, then quiet thanks. No joke this time.",
+    under: "Validation runs against her expectation of being judged. For a moment the belief that no one understands loosens.",
+    tip: "This is the payoff of the earlier validation. Slow down; a reflective pause will do more here than the next question.",
+    instead: "Take your time. What's it like to hear that?" },
+];
+TURNS.forEach((t, i) => { if (t.who !== "p") return; (t.path || []).forEach(([a, b]) => { if (!EVID[a + "→" + b]) console.warn("no such edge", a, b); });
+  t.spans.forEach(([s]) => { if (!t.text.includes(s)) console.warn("span not found", i, s); }); });
+
+// ---- helpers ----
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const chip = (n, ez) => `<span class="chip${ez ? " ez" : ""}" style="--c:var(${cvar(n)})" title="${esc(n)}"><i></i>${esc(short(n))}</span>`;
+const byFlow = (a, b) => COL[TYPE_OF[a]] - COL[TYPE_OF[b]];
+function loopEdges(path) {                     // edges of the path that lie on a cycle within the path
+  const out = new Set();
+  path.forEach(([a, b]) => { const seen = new Set([b]), st = [b];
+    while (st.length) { const x = st.pop(); if (x === a) { out.add(a + "→" + b); break; }
+      path.forEach(([p, q]) => { if (p === x && !seen.has(q)) { seen.add(q); st.push(q); } }); } });
+  return out;
+}
+
+// ---- network layout: CBT flow columns, rows ordered to keep linked nodes near each other ----
+const W = 560, H = 340, X0 = 56, DX = 112, Y0 = 44, Y1 = 318;
+const cols = TYPES.map(x => NET.nodes.filter(n => n.type === x.t).map(n => n.name));
+const nbr = {}; NET.edges.forEach(e => { (nbr[e.from] = nbr[e.from] || []).push(e.to); (nbr[e.to] = nbr[e.to] || []).push(e.from); });
+const pos = {};
+const place = () => cols.forEach((c, ci) => c.forEach((n, i) => { pos[n] = { x: X0 + ci * DX, y: c.length === 1 ? (Y0 + Y1) / 2 : Y0 + i * (Y1 - Y0) / (c.length - 1) }; }));
+place();
+for (let it = 0; it < 6; it++) { cols.forEach(c => c.sort((a, b) => {
+  const m = n => { const ns = (nbr[n] || []).filter(x => pos[x]); return ns.length ? ns.reduce((s, x) => s + pos[x].y, 0) / ns.length : pos[n].y; };
+  return m(a) - m(b); })); place(); }
+function curve(a, b) {
+  const p = pos[a], q = pos[b];
+  if (q.x > p.x) { const d = (q.x - p.x) / 2; return `M${p.x},${p.y} C${p.x + d},${p.y} ${q.x - d},${q.y} ${q.x},${q.y}`; }
+  if (q.x === p.x) { const k = 26 + Math.abs(q.y - p.y) * 0.25; return `M${p.x},${p.y} C${p.x - k},${p.y} ${q.x - k},${q.y} ${q.x},${q.y}`; }
+  const lift = Math.min(p.y, q.y) - 40 - (p.x - q.x) * 0.08;      // backward (feedback) edges arc over the top
+  return `M${p.x},${p.y} C${p.x + 30},${lift} ${q.x - 30},${lift} ${q.x},${q.y}`;
+}
+const svg = $("#net"), NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
+const defs = el("defs", {}, svg);
+TYPES.concat([{ t: "acc", v: "--accent" }]).forEach(x => { const m = el("marker", { id: "ar-" + COL[x.t] ?? "acc", viewBox: "0 0 8 8", markerWidth: 7, markerHeight: 7, refX: 15, refY: 4, orient: "auto", markerUnits: "userSpaceOnUse" }, defs);
+  m.id = "ar-" + (x.t === "acc" ? "acc" : COL[x.t]); el("path", { d: "M0,0 L8,4 L0,8 z", style: `fill:var(${x.v})` }, m); });
+TYPES.forEach((x, i) => { const t = el("text", { x: X0 + i * DX, y: 18, "text-anchor": "middle", class: "colh", style: `fill:var(${x.v})` }, svg); t.textContent = x.lab + (i < 4 ? "  →" : ""); });
+const gBase = el("g", {}, svg), gFx = el("g", {}, svg), gNodes = el("g", {}, svg);
+NET.edges.forEach(e => el("path", { d: curve(e.from, e.to), class: "e" }, gBase));
+const nodeEl = {};
+NET.nodes.forEach(n => { const p = pos[n.name], g = el("g", { class: "nd", transform: `translate(${p.x},${p.y})` }, gNodes);
+  el("title", {}, g).textContent = n.name;
+  el("circle", { class: "halo", r: 8, style: `stroke:var(${cvar(n.name)})` }, g);
+  el("circle", { class: "dot", r: 5, style: `fill:var(${cvar(n.name)})` }, g);
+  const t = el("text", { class: "lb", y: 18 }, g); t.textContent = short(n.name);
+  nodeEl[n.name] = g; });
+$("#legend").innerHTML = TYPES.map(x => `<span><i style="--c:var(${x.v})"></i>${x.lab}</span>`).join("") + `<span><i class="ring"></i>Eased</span>`;
+
+// ---- network state for a turn, with a staged animation along its causal path ----
+let timers = [];
+const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+const later = (ms, f) => { if (REDUCED || ms <= 0) f(); else timers.push(setTimeout(f, ms)); };
+const patientIdx = TURNS.map((t, i) => t.who === "p" ? i : -1).filter(i => i >= 0);
+const degree = n => (nbr[n] || []).length;
+function showTurn(idx, animate) {
+  clearTimers(); gFx.innerHTML = "";
+  const t = TURNS[idx];
+  const seen = new Set(); patientIdx.filter(i => i <= idx).forEach(i => TURNS[i].active.forEach(n => seen.add(n)));
+  Object.entries(nodeEl).forEach(([n, g]) => { g.classList.toggle("seen", seen.has(n)); g.classList.remove("on", "ez", "hl"); });
+  const path = (t.path || []).slice().sort((a, b) => byFlow(a[0], b[0]) || byFlow(a[1], b[1]));
+  const loops = loopEdges(path), STEP = animate ? 420 : 0;
+  const appear = {};                           // a node lights when the first edge touching it is drawn
+  path.forEach(([a, b], i) => { appear[a] = Math.min(appear[a] ?? Infinity, i * STEP); appear[b] = Math.min(appear[b] ?? Infinity, i * STEP + STEP * 0.8); });
+  t.active.forEach(n => later(appear[n] ?? 0, () => nodeEl[n].classList.add("on")));
+  (t.eased || []).forEach(n => later(animate ? 200 : 0, () => nodeEl[n].classList.add("ez")));
+  path.forEach(([a, b], i) => {
+    const key = a + "→" + b, loop = loops.has(key);
+    const p = el("path", { d: curve(a, b), class: "fx", style: `stroke:var(${loop ? "--accent" : cvar(a)})`, "marker-end": `url(#ar-${loop ? "acc" : COL[TYPE_OF[a]]})` }, gFx);
+    el("title", {}, p).textContent = `${a} → ${b}\n${EVID[key] || ""}`;
+    if (!animate || REDUCED) { if (loop) p.classList.add("flow"); return; }
+    const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    later(i * STEP, () => { p.style.transition = "stroke-dashoffset .45s ease"; p.style.strokeDashoffset = 0; });
+    later(i * STEP + 480, () => { p.style.transition = ""; p.style.strokeDasharray = ""; p.style.strokeDashoffset = ""; if (loop) p.classList.add("flow"); });
+  });
+  const pn = patientIdx.indexOf(idx) + 1;
+  $("#netcap").innerHTML = `Reply ${pn} · ${t.active.length ? t.active.length + " nodes lit" : "no new activation"}${loops.size ? " · <b>maintaining loop</b>" : ""}${(t.eased || []).length ? " · <b>" + t.eased.length + " eased</b>" : ""}`;
+  const un = NET.nodes.map(n => n.name).filter(n => !seen.has(n) && degree(n) > 0).sort((a, b) => degree(b) - degree(a)).slice(0, 4);
+  $("#cov").textContent = `${seen.size} of ${NET.nodes.length} network nodes surfaced so far`;
+  $("#unexp").innerHTML = un.length ? `Not explored yet: <b>${un.map(n => esc(short(n))).join(", ")}</b>` : "";
+}
+
+// ---- transcript ----
+const log = $("#log");
+function markText(t) {
+  let out = "", pos0 = 0;
+  t.spans.forEach(([s, n, ez]) => { const i = t.text.indexOf(s, pos0); if (i < 0) return;
+    out += esc(t.text.slice(pos0, i)) + `<mark class="sp${ez ? " ez" : ""}" style="--c:var(${ez ? "--ease" : cvar(n)})" data-n="${esc(n)}">${esc(s)}</mark>`; pos0 = i + s.length; });
+  return out + esc(t.text.slice(pos0));
+}
+function renderMsg(i) {
+  const t = TURNS[i], li = document.createElement("li");
+  li.className = "msg " + t.who; li.dataset.i = i;
+  if (t.who === "t") {
+    const txt = t.trig ? esc(t.text).replace(esc(t.trig), `<span class="trig-word" title="This phrase triggers a reaction">${esc(t.trig)}</span>`) : esc(t.text);
+    li.innerHTML = `<div class="who-l">Trainee</div><div class="bubble">${txt}</div>`;
+  } else {
+    const types = [...new Set(t.active.map(n => TYPE_OF[n]))].sort((a, b) => COL[a] - COL[b]);
+    const loop = loopEdges(t.path || []).size > 0;
+    li.innerHTML = `<div class="who-l">Emily</div><div class="bubble" tabindex="0" role="button" aria-label="Show what's happening in this reply">${markText(t)}</div>
+      <div class="dots">${types.map(x => `<i style="--c:var(${TYPES[COL[x]].v})" title="${esc(TYPES[COL[x]].lab)}"></i>`).join("")}
+      <span class="tag${loop ? " loop" : ""}">${esc(t.title)}${loop ? " · loop" : ""}${(t.eased || []).length ? " · easing" : ""}</span></div>`;
+    const b = li.querySelector(".bubble");
+    b.addEventListener("mouseenter", () => hoverStart(i, b));
+    b.addEventListener("mouseleave", hoverEnd);
+    b.addEventListener("click", () => pin(i, true));
+    b.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pin(i, true); } });
+    li.querySelectorAll(".sp").forEach(m => { m.addEventListener("mouseenter", () => nodeEl[m.dataset.n]?.classList.add("hl"));
+      m.addEventListener("mouseleave", () => nodeEl[m.dataset.n]?.classList.remove("hl")); });
+  }
+  log.appendChild(li); return li;
+}
+
+// ---- explanations: compact on hover, full when pinned ----
+function chainHTML(t, max) {
+  const quote = n => (t.spans.find(s => s[1] === n) || [])[0];
+  const ns = t.active.slice().sort(byFlow).slice(0, max || 99);
+  return `<ol class="chain">${ns.map(n => `<li>${chip(n)}<span class="q">${quote(n) ? `“<em>${esc(quote(n))}</em>”` : n === t.trigger?.node ? "set off by your question" : TYPE_OF[n] === "Stimulus" ? "background" : "implied, not said"}</span></li>`).join("")}
+    ${(t.eased || []).map(n => `<li>${chip(n, true)}<span class="q">eased${quote(n) ? `: “<em>${esc(quote(n))}</em>”` : ""}</span></li>`).join("")}</ol>`;
+}
+const trigHTML = t => t.trigger ? `<div class="trig">Triggered by <q>${esc(t.trigger.phrase)}</q> → ${chip(t.trigger.node)}</div>` : "";
+function popHTML(i) {
+  const t = TURNS[i], loop = loopEdges(t.path || []).size > 0;
+  return `<div><div class="eyebrow">Reply ${patientIdx.indexOf(i) + 1} · what's happening</div><div class="ttl">${esc(t.title)}</div></div>
+    ${trigHTML(t)}${chainHTML(t, 5)}
+    ${loop ? `<div class="loopnote">Maintaining loop: these reactions feed each other, so the cycle keeps itself going.</div>` : ""}
+    <div class="two"><div><h4>She shows</h4>${esc(t.surface)}</div><div><h4>Underneath</h4>${esc(t.under)}</div></div>
+    <div class="foot">Click to pin the full explanation</div>`;
+}
+function detailHTML(i) {
+  const t = TURNS[i], path = t.path || [], loops = loopEdges(path);
+  return `<div><div class="eyebrow">Reply ${patientIdx.indexOf(i) + 1} of ${patientIdx.length} · pinned</div><h3>${esc(t.title)}</h3></div>
+    ${trigHTML(t)}
+    <div><h4>What she expresses</h4>${chainHTML(t)}</div>
+    ${loops.size ? `<div class="loopnote">Maintaining loop (blue, moving): ${[...loops].map(k => k.split("→").map(short).join(" → ")).map(esc).join("; ")}</div>` : ""}
+    <div class="two"><div><h4>She shows</h4><p>${esc(t.surface)}</p></div><div><h4>Underneath</h4><p>${esc(t.under)}</p></div></div>
+    ${path.length ? `<div><h4>Why these links (from her profile)</h4><ul class="ev">${path.map(([a, b]) => `<li><span class="arr">${esc(short(a))} → ${esc(short(b))}</span>: ${esc(EVID[a + "→" + b] || "")}</li>`).join("")}</ul></div>` : ""}
+    <div class="tip"><h4>For the trainee</h4><p>${esc(t.tip)}</p><p class="try"><b>You could try:</b> “${esc(t.instead)}”</p></div>
+    <div class="nav"><button type="button" id="prev">← Previous reply</button> <button type="button" id="next">Next reply →</button></div>`;
+}
+let pinned = null, hoverT = null, hovering = null;
+const pop = $("#pop"), canHover = matchMedia("(hover: hover)").matches;
+function pin(i, animate) {
+  pinned = i;
+  log.querySelectorAll(".msg.p").forEach(m => m.classList.toggle("pinned", +m.dataset.i === i));
+  const d = $("#detail"); d.classList.remove("swap"); void d.offsetWidth; d.classList.add("swap");
+  d.innerHTML = detailHTML(i);
+  const k = patientIdx.indexOf(i);
+  $("#prev").disabled = k <= 0; $("#next").disabled = k >= patientIdx.length - 1 || !log.querySelector(`[data-i="${patientIdx[k + 1]}"]`);
+  $("#prev").onclick = () => { const j = patientIdx[k - 1]; pin(j, true); scrollToMsg(j); };
+  $("#next").onclick = () => { const j = patientIdx[k + 1]; pin(j, true); scrollToMsg(j); };
+  pop.hidden = true; hovering = null;
+  showTurn(i, animate);
+}
+const scrollToMsg = i => log.querySelector(`[data-i="${i}"]`)?.scrollIntoView({ block: "nearest", behavior: REDUCED ? "auto" : "smooth" });
+function hoverStart(i, bubble) {
+  if (!canHover) return;
+  clearTimeout(hoverT);
+  hoverT = setTimeout(() => {
+    hovering = i;
+    pop.innerHTML = popHTML(i); pop.hidden = false; pop.style.animation = "none"; void pop.offsetWidth; pop.style.animation = "";
+    const r = bubble.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+    // stay inside the transcript column so the network panel stays visible while it animates
+    const c = log.getBoundingClientRect(), wide = innerWidth > 900;
+    let x = wide ? Math.min(r.left + 24, c.right - pw - 8) : Math.max(12, Math.min(r.left, innerWidth - pw - 12));
+    let y = r.bottom + 8;
+    if (y + ph > innerHeight - 12) y = r.top - ph - 8;
+    if (y < 12) { y = 12; if (wide) x = Math.max(c.left + 8, r.right - pw); }
+    x = Math.max(12, x);
+    pop.style.left = x + "px"; pop.style.top = y + "px";
+    if (i !== pinned) showTurn(i, true);
+  }, 110);
+}
+function hoverEnd() {
+  clearTimeout(hoverT); pop.hidden = true;
+  if (hovering != null && hovering !== pinned && pinned != null) showTurn(pinned, false);
+  hovering = null;
+}
+
+// ---- replay: messages arrive one by one and the network lights up as Emily answers ----
+let playing = false, runId = 0;
+const sleep = ms => new Promise(r => setTimeout(r, REDUCED ? 0 : ms));
+async function replay() {
+  const id = ++runId; playing = true; setPlay();
+  log.innerHTML = ""; pinned = null; $("#detail").innerHTML = `<div class="eyebrow">Replaying</div><p>Each reply lights up the parts of Emily's network it expresses.</p>`;
+  clearTimers(); gFx.innerHTML = ""; Object.values(nodeEl).forEach(g => g.classList.remove("seen", "on", "ez", "hl"));
+  $("#netcap").textContent = ""; $("#unexp").textContent = ""; $("#cov").textContent = "";
+  for (let i = 0; i < TURNS.length; i++) {
+    if (id !== runId) return;
+    if (TURNS[i].who === "p") {
+      const ty = document.createElement("li"); ty.className = "msg p typing";
+      ty.innerHTML = `<div class="who-l">Emily</div><div class="bubble"><i></i><i></i><i></i></div>`; log.appendChild(ty); scrollToMsg(-1); ty.scrollIntoView({ block: "nearest" });
+      await sleep(900 + TURNS[i].text.length * 6); if (id !== runId) return; ty.remove();
+      renderMsg(i); scrollToMsg(i); pin(i, true);
+      await sleep(1400 + (TURNS[i].path || []).length * 420);
+    } else { renderMsg(i); scrollToMsg(i); await sleep(700); }
+  }
+  playing = false; setPlay();
+}
+function stopReplay() { runId++; playing = false; log.innerHTML = ""; TURNS.forEach((_, i) => renderMsg(i)); pin(patientIdx[1], false); setPlay(); }
+function setPlay() { $("#play span").textContent = playing ? "Stop replay" : "Replay session"; }
+$("#play").onclick = () => playing ? stopReplay() : replay();
+
+// start complete: full transcript, the checking loop pinned
+TURNS.forEach((_, i) => renderMsg(i));
+pin(patientIdx[1], false);
+</script>

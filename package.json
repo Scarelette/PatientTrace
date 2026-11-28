@@ -1,0 +1,8 @@
+{
+  "name": "patienttrace-frontend",
+  "private": true,
+  "description": "Frontend dependencies of the PatientTrace web app. There is no JS build step: scripts/vendor_three.sh copies the pinned files into patienttrace/static/vendor/.",
+  "dependencies": {
+    "three": "0.170.0"
+  }
+}
