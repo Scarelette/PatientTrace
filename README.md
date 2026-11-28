@@ -4,9 +4,12 @@ Interview a simulated mental-health patient and watch each reply being traced on
 symptom network; then pick a look-alike patient (same presenting problem, different reasons behind it)
 and ask both the same questions to see where their formulations part ways.
 
-<p align="center"><img src="docs/media/formulation-contrast.gif" alt="Formulation Contrast: two patients answer the same questions; the gap between their tracks opens as their answers diverge" width="880"></p>
+| Network model | Interview | Formulation Contrast |
+|:---:|:---:|:---:|
+| [![Network model](docs/media/network.gif)](docs/media/network.mp4) | [![Interview page](docs/media/interview.gif)](docs/media/interview.mp4) | [![Formulation Contrast](docs/media/contrast.gif)](docs/media/contrast.mp4) |
+| Each patient's symptom network in a layered 3D or a 2D view (27 s) | A recorded interview: each reply opens the themes it touches (32 s) | Two look-alike patients, the same questions, the gap between their answers (40 s) |
 
-**Screencast (2½ min, recorded examples only):** [docs/media/patienttrace-demo.mp4](docs/media/patienttrace-demo.mp4)
+Short screencasts from the recorded examples (click a preview for the video).
 
 | | |
 |---|---|

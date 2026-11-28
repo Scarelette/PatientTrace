@@ -1,7 +1,7 @@
 """Record a demo screencast (WebM) from the recorded sessions only: library -> Emily's network -> her recorded
 interview replaying -> contrast picker -> the recorded Max vs Natasha Formulation Contrast round (reflection,
 AI reading, baskets) -> end-of-round reveal. A caption bar explains each step. Convert to MP4 with ffmpeg.
-Usage: python scripts/screencast.py URL OUTDIR [--width 1280 --height 800]"""
+Usage: python scripts/screencast.py URL OUTDIR [--dark]"""
 import os, sys, time
 from playwright.sync_api import sync_playwright
 URL, OUT = sys.argv[1].rstrip("/"), sys.argv[2]; os.makedirs(OUT, exist_ok=True)
@@ -9,7 +9,7 @@ W, H = 1280, 800
 CAP = """(t) => { let c = document.getElementById('sc-cap');
   if (!c) { c = document.createElement('div'); c.id = 'sc-cap';
     c.style.cssText = 'position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;max-width:88%;padding:10px 18px;border-radius:12px;'
-      + 'background:rgba(20,22,30,.86);color:#fff;font:600 16px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);'
+      + 'background:rgba(20,22,30,.9);color:#fff;border:1px solid rgba(255,255,255,.18);font:600 16px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);'
       + 'text-align:center;transition:opacity .35s;pointer-events:none'; document.body.appendChild(c); }
   c.style.opacity = t ? 1 : 0; if (t) c.textContent = t; }"""
 CURSOR = """() => { if (document.getElementById('sc-cur')) return; const d = document.createElement('div'); d.id = 'sc-cur';
@@ -33,7 +33,8 @@ def hover(pg, sel, pause=1200):
 
 with sync_playwright() as p:
     b = p.chromium.launch()
-    ctx = b.new_context(viewport={"width": W, "height": H}, record_video_dir=OUT, record_video_size={"width": W, "height": H}, color_scheme="light")
+    ctx = b.new_context(viewport={"width": W, "height": H}, record_video_dir=OUT, record_video_size={"width": W, "height": H},
+                        color_scheme="dark" if "--dark" in sys.argv else "light")
     pg = ctx.new_page(); t0 = time.time()
     pg.goto(URL + "/"); pg.wait_for_timeout(600); pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_timeout(1500)
     cap(pg, "PatientTrace: interview simulated patients and see what each answer reveals about their symptom network", 4200)
